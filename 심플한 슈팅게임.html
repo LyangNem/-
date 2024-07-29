@@ -115,6 +115,14 @@
             color: black;
         }
     </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            alert("이 게임은 모바일을 지원하지 않습니다.");
+        }
+    });
+    </script>
 </head>
 
 <body oncontextmenu="return false">
