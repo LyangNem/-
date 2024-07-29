@@ -71,7 +71,7 @@
     </style>
 </head>
 
-<body>
+<body oncontextmenu="return false">
     <div id="weaponSelect">
         <h2>무기를 선택하세요:</h2>
         <p>
@@ -146,8 +146,8 @@
                 rarity: "common",
                 apply: function () {
                     if (game.player.weapon) {
-                        game.player.weapon.damage *= 1.08;
-                        game.weapons.secondchance.laserdamage *= 1.08;
+                        game.player.weapon.damage += game.player.weapon.basedamage * 0.08;
+                        game.weapons.secondchance.laserdamage += game.player.weapon.baselaserdamage * 0.08;
                     }
                 }
             },
@@ -163,11 +163,11 @@
             damageBoostpack: {
                 name: "공격력 강화 팩",
                 description: "무기의 데미지를 12% 증가시킵니다.",
-                rarity: "rare",
+                rarity: "epic",
                 apply: function () {
                     if (game.player.weapon) {
-                        game.player.weapon.damage *= 1.12;
-                        game.weapons.secondchance.laserdamage *= 1.12;
+                        game.player.weapon.damage += game.player.weapon.basedamage * 0.12;
+                        game.weapons.secondchance.laserdamage += game.weapons.secondchance.baselaserdamage * 0.12;
                     }
                 }
             },
@@ -177,7 +177,7 @@
                 rarity: "rare",
                 apply: function () {
                     if (game.player.weapon) {
-                        game.player.weapon.speed *= 1.2;
+                        game.player.weapon.speed += game.player.weapon.basespeed * 0.2;
                     }
                 }
             },
@@ -195,16 +195,21 @@
                 description: "공격속도가 12% 빨라집니다.",
                 rarity: "epic",
                 apply: function () {
-                    game.player.weapon.cooldown *= 0.88;
+                    game.player.weapon.cooldown -= game.player.weapon.basecooldown * 0.12;
+                    if (game.player.weapon.cooldown < 1) {
+                        game.player.weapon.cooldown = 1;
+                    }
                 }
             },
             speedBoost: {
                 name: "빠른 움직임",
                 description: "이동속도가 8% 빨라집니다.",
-                rarity: "epic",
+                rarity: "rare",
                 apply: function () {
-                    game.player.speed *= 1.08;
-                    game.player.defaultSpeed *= 1.08;
+                    game.player.speed += game.player.basespeed * 0.08;
+                    game.player.defaultSpeed += game.player.basespeed * 0.08;
+                    console.log("Speed: ", game.player.speed);
+        console.log("Default Speed: ", game.player.defaultSpeed);
                 }
             },
             parryBoost: {
@@ -212,7 +217,7 @@
                 description: "쉴드의 쿨다운 속도가 50% 증가합니다.",
                 rarity: "legendary",
                 apply: function () {
-                    game.player.parryCooldownspeed *= 1.5;
+                    game.player.parryCooldownspeed += game.player.baseparryCooldownspeed * 0.5;
                 }
             },
             weaponBoost: {
@@ -234,7 +239,7 @@
                         this.description = "발사되는 탄환의 개수가 1개 증가합니다.";
                     } else if (weaponName === 'swing') {
                         this.name = "그것은 매우 강한!";
-                        this.description = "공격 범위가 15 증가합니다.";
+                        this.description = "공격 범위가 10% 증가합니다.";
                     } else if (weaponName === 'chain') {
                         this.name = "추가 연쇄";
                         this.description = "탄환의 연쇄되는 적의 수가 1명 증가하며, 피해량 감소 폭이 줄어듭니다.";
@@ -243,10 +248,10 @@
                         this.description = "최대체력 증가량이 1 증가합니다.";
                     } else if (weaponName === 'burst') {
                         this.name = "업그레이드";
-                        this.description = "공격속도가 10% 빨라지고, 폭발 범위가 15 증가합니다.";
+                        this.description = "탄속과 공격 범위가 10% 증가합니다.";
                     } else if (weaponName === 'secondchance') {
                         this.name = "파괴광선";
-                        this.description = "레이저의 크기가 15 증가합니다.";
+                        this.description = "레이저의 크기가 20% 증가합니다.";
                     } else {
                         this.name = "전용 강화";
                         this.description = "현재 무기에는 특별한 스킬이 없습니다.";
@@ -258,21 +263,21 @@
                     } else if (selectedWeaponName === 'spray') {
                         game.weapons.spray.pierce += 1;
                     } else if (selectedWeaponName === 'strike') {
-                        game.weapons.strike.damage *= 1.1;
-                        game.weapons.strike.range *= 1.05;
+                        game.weapons.strike.damage += game.weapons.strike.basedamage * 0.1;
+                        game.weapons.strike.range += game.weapons.strike.baserange * 0.05;
                     } else if (selectedWeaponName === 'dual') {
                         game.weapons.dual.bullets += 1;
                     } else if (selectedWeaponName === 'swing') {
-                        game.weapons.swing.range += 15;
+                        game.weapons.swing.range += game.weapons.swing.baserange * 0.1;
                     } else if (selectedWeaponName === 'chain') {
                         game.weapons.chain.chaincount += 1;
                     } else if (selectedWeaponName === 'absorb') {
                         game.weapons.absorb.value += 1;
                     } else if (selectedWeaponName === 'burst') {
-                        game.weapons.burst.cooldown *= 0.9;
-                        game.weapons.burst.explosiverange += 15 ;
+                        game.weapons.burst.explosiverange += game.weapons.burst.baseexplosiverange * 0.1 ;
+                        game.weapons.burst.speed += game.weapons.burst.basespeed * 0.1;
                     } else if (selectedWeaponName === 'secondchance') {
-                        game.weapons.secondchance.laserthickness += 15;
+                        game.weapons.secondchance.laserthickness += game.weapons.secondchance.baselaserthickness * 0.2;
                     }
                 }
             }
@@ -316,7 +321,7 @@
         common: 0.4,
         rare: 0.3,
         epic: 0.2,
-        legendary: 2
+        legendary: 0.1
     };
 
     function getRandomItem() {
@@ -427,13 +432,13 @@ let mouseX = 0,
     mouseY = 0;
 let mouseDown = false;
 const keys = {};
-let score = 1400;
+let score = 0;
 let summonSpeed = 120;
 
 const game = {
     summonSpeed: 120,
     summonSpeedDecreaseInterval: 100,
-    minSummonSpeed: 20,
+    minSummonSpeed: 0.03,
     lasers: [],
     isPaused: false,
 
@@ -572,7 +577,10 @@ const game = {
                 parryDuration: 0,
                 parryCooldown: 0,
                 parryCooldownspeed: 1,
+                baseparryCooldownspeed: 1,
                 parryHits: 0,
+                basespeed: 4,
+                basedefaultSpeed: 4,
                 speed: 4,
                 defaultSpeed: 4,
                 weapon: null,
@@ -720,6 +728,9 @@ const game = {
             weapons: {
                 multishot: {
                     name: "다중 발사",
+                    basedamage: 30,
+                    basespeed: 10,
+                    basecooldown: 500,
                     damage: 30,
                     speed: 10,
                     spread: 6,
@@ -744,6 +755,9 @@ const game = {
                 },
                 spray: {
     name: "스프레이",
+    basedamage: 80,
+                    basespeed: 20,
+                    basecooldown: 150,
     damage: 80,
     speed: 20,
     spread: 0.1,
@@ -773,6 +787,10 @@ const game = {
 },
                 strike: {
                     name: "내려치기",
+                    basedamage: 80,
+                    basespeed: 0,
+                    basecooldown: 400,
+                    baserange: 40,
                     damage: 80,
                     speed: 0,
                     spread: 0,
@@ -786,6 +804,9 @@ const game = {
                 },
                 dual: {
                     name: "두개",
+                    basedamage: 32,
+                    basespeed: 15,
+                    basecooldown: 280,
     damage: 32,
     speed: 15,
     spread: 0,
@@ -821,6 +842,10 @@ const game = {
                 },
                 swing: {
                     name: "휘두르다",
+                    basedamage: 200,
+                    basespeed: 0,
+                    basecooldown: 350,
+                    baserange: 150,
                     damage: 200,
                     speed: 0,
                     spread: 0,
@@ -861,6 +886,9 @@ const game = {
                 },
                 absorb: {
                     name: "흡수",
+                    basedamage: 50,
+                    basespeed: 15,
+                    basecooldown: 500,
                     damage: 50,
                     speed: 15,
                     cooldown: 500,
@@ -883,6 +911,10 @@ const game = {
                 },
                 burst: {
                     name: "터지는 공격",
+                    basedamage: 250,
+                    basespeed: 10,
+                    basecooldown: 1000,
+                    baseexplosiverange: 150,
                     damage: 250,
                     speed: 10,
                     cooldown: 1000,
@@ -905,6 +937,11 @@ const game = {
                 },
                 secondchance: {
                     name: "두번째 기회",
+                    basedamage: 80,
+                    baselaserdamage: 50,
+                    baselaserthickness: 50,
+                    basespeed: 20,
+                    basecooldown: 700,
                     damage: 80,
                     laserdamage: 50,
                     laserthickness: 50,
@@ -1661,8 +1698,12 @@ const game = {
             },
 
             updateSummonSpeed: function() {
-                if (game.summonSpeed > game.minSummonSpeed) {
+                if (game.summonSpeed >= 20) {
                     game.summonSpeed -= 2;
+                } else if (20 > game.summonSpeed >= 3) {
+                    game.summonSpeed -= 0.4;
+                } else if (3 > game.summonSpeed > game.minSummonSpeed) {
+                    game.summonSpeed -= 0.02;
                 }
             },
 
@@ -1887,7 +1928,7 @@ const game = {
 
                 game.utils.separateEnemies();
 
-                score++;
+                score ++;
                 if (score % game.summonSpeed === 0) {
                     game.spawnEnemy();
                 }
@@ -1978,27 +2019,69 @@ const game = {
 
             reset: function() {
                 game.player.health = 100;
-        game.player.x = canvas.width / 2;
-        game.player.y = canvas.height - 30;
-        game.player.isParrying = false;
-        game.player.parryDuration = 0;
-        game.player.parryCooldown = 0;
-        game.player.parryHits = 0;
-        game.player.dashesLeft = 5;
-        game.player.isDashing = false;
-        game.player.dashDuration = 0;
-        game.enemies = [];
-        game.bullets = [];
-        game.enemyBullets = [];
-        game.lasers = []; // 레이저 초기화
-        game.summonSpeed = 120;
-        game.summonSpeedDecreaseInterval = 100;
-        score = 0;
-        document.getElementById("weaponSelect").style.display = "block";
-        document.getElementById("functionFive").style.display = "block"; // 리셋 시 표시
-        document.getElementById("nextStageEnemy").style.display = "none"; // 리셋 시 숨기기
-        canvas.style.display = "none";
-        stage = 1; // 스테이지를 1로 초기화
+    game.player.maxHealth = 100; // 최대 체력 초기화
+    game.player.x = canvas.width / 2;
+    game.player.y = canvas.height - 30;
+    game.player.isParrying = false;
+    game.player.parryDuration = 0;
+    game.player.parryCooldown = 0;
+    game.player.parryHits = 0;
+    game.player.dashesLeft = 5;
+    game.player.isDashing = false;
+    game.player.dashDuration = 0;
+    game.player.hitDuration = 0;
+    game.player.isDebuffed = false;
+    game.player.debuffColor = null;
+    game.player.debuffDuration = 0;
+    game.player.speed = game.player.basespeed;
+    game.player.defaultSpeed = game.player.basedefaultSpeed;
+    game.player.weapon = null; // 무기 초기화
+
+    // 무기 속성 초기화
+    Object.keys(game.weapons).forEach(weaponName => {
+        const weapon = game.weapons[weaponName];
+        weapon.damage = weapon.basedamage;
+        weapon.speed = weapon.basespeed;
+        weapon.cooldown = weapon.basecooldown;
+        if (weapon.baserange) {
+            weapon.range = weapon.baserange;
+        }
+        if (weapon.spread) {
+            weapon.spread = weapon.basespread;
+        }
+        if (weapon.baselaserdamage) {
+            weapon.laserdamage = weapon.baselaserdamage;
+        }
+        if (weapon.baselaserthickness) {
+            weapon.laserthickness = weapon.baselaserthickness;
+        }
+        if (weapon.baseexplosiverange) {
+            weapon.explosiverange = weapon.baseexplosiverange;
+        }
+        if (weapon.baseBulletSpacing) {
+            weapon.bulletSpacing = weapon.baseBulletSpacing;
+        }
+        if (weapon.baseBulletRadius) {
+            weapon.bulletRadius = weapon.baseBulletRadius;
+        }
+        if (weapon.basecooldown) {
+            weapon.cooldown = weapon.basecooldown;
+        }
+    });
+
+    game.enemies = [];
+    game.bullets = [];
+    game.enemyBullets = [];
+    game.lasers = []; // 레이저 초기화
+    game.effects.effectsList = []; // 효과 초기화
+    game.summonSpeed = 120;
+    game.summonSpeedDecreaseInterval = 100;
+    score = 0;
+    document.getElementById("weaponSelect").style.display = "block";
+    document.getElementById("functionFive").style.display = "block"; // 리셋 시 표시
+    document.getElementById("nextStageEnemy").style.display = "none"; // 리셋 시 숨기기
+    canvas.style.display = "none";
+    stage = 1; // 스테이지를 1로 초기화
         gamePaused = true; // 게임 리셋 시 일시 중지
             }
         };
