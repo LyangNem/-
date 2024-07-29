@@ -279,11 +279,11 @@ function returnToMainMenu() {
             },
             moreHealth: {
                 name: "더 많은 체력",
-                description: "최대 체력이 25 증가합니다.",
+                description: "최대 체력이 30 증가합니다.",
                 rarity: "rare",
                 apply: function () {
-                    game.player.maxHealth += 25;
-                    game.player.health = Math.min(game.player.health + 25, game.player.maxHealth);
+                    game.player.maxHealth += 30;
+                    game.player.health = Math.min(game.player.health + 30, game.player.maxHealth);
                     collectedItems.push(this);
                 }
             },
@@ -1307,7 +1307,7 @@ function returnToMainMenu() {
                                 speed: 5,
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
-                                damage: 5
+                                damage: 10
                             });
                             enemy.shootCooldown = enemy.shootCooldownValue;
                         } else {
@@ -1356,7 +1356,7 @@ function returnToMainMenu() {
                                     y: enemy.y,
                                     radius: 5,
                                     color: enemy.color,
-                                    speed: 5,
+                                    speed: 10,
                                     dx: Math.cos(angle + i * spread),
                                     dy: Math.sin(angle + i * spread),
                                     damage: enemy.damage
@@ -1745,13 +1745,13 @@ function returnToMainMenu() {
                     speed: 0,
                     type: 'charger',
                     shootCooldown: 300,
-                    damage: 5,
+                    damage: 10,
                     spawnRate: 0.75,
                     scoreValue: 80,
                     bodyStrength: 0.7,
                     borderResis: 0,
                     move: function(enemy) {
-                        // Charger는 움직이지 않음
+                        // 차저는 움직이지 않음
                     },
                     attack: function(enemy) {
                         if (enemy.shootCooldown <= 0) {
@@ -1773,7 +1773,6 @@ function returnToMainMenu() {
                                     hitChargers: [enemy]
                                 });
                             } else {
-                                // 다른 충전기가 없을 때 플레이어를 타겟으로 설정
                                 let dx = game.player.x - enemy.x;
                                 let dy = game.player.y - enemy.y;
                                 let angle = Math.atan2(dy, dx);
