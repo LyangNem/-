@@ -15,7 +15,7 @@
             padding: 0;
             overflow: hidden;
         }
-        
+
         canvas {
             background: #eee;
             display: block;
@@ -139,7 +139,7 @@
 
 <body oncontextmenu="return false">
     <div id="weaponSelect">
-        <h2>무기를 선택하세요:</h2>
+        <h2>무기를 고르다</h2>
         <p>
             <button onmouseover="showDescription('multishot')" onmouseout="hideDescription()" onclick="selectWeapon('multishot')">다중 발사</button>
             <button onmouseover="showDescription('spray')" onmouseout="hideDescription()" onclick="selectWeapon('spray')">스프레이</button>
@@ -2080,68 +2080,68 @@ function returnToMainMenu() {
             drawGame: function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = "gray";
-                ctx.font = "30px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText(`Stage ${stage}`, canvas.width / 2, 50);
+    ctx.fillStyle = "gray";
+    ctx.font = "30px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(`Stage ${stage}`, canvas.width / 2, 50);
 
-                game.player.draw();
-                game.player.drawUI();
+    game.player.draw();
+    game.player.drawUI();
 
-                game.lasers.forEach(laser => {
-                    game.drawLaser(laser);
-                });
+    game.lasers.forEach(laser => {
+        game.drawLaser(laser);
+    });
 
-                game.enemies.forEach(enemy => {
-                    ctx.beginPath();
-                    ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = enemy.color;
-                    ctx.fill();
+    game.enemies.forEach(enemy => {
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+        ctx.fillStyle = enemy.color;
+        ctx.fill();
 
-                    let outlineColor = `hsl(${getHue(enemy.color)}, 70%, ${getLightness(enemy.color) - 20}%)`;
-                    if (enemy.isBuffedB) {
-                        outlineColor = "green";
-                    } else if (enemy.isBuffed) {
-                        outlineColor = "blue";
-                    }
-                    ctx.strokeStyle = outlineColor;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    ctx.closePath();
+        let outlineColor = `hsl(${getHue(enemy.color)}, 70%, ${getLightness(enemy.color) - 20}%)`;
+        if (enemy.isBuffedB) {
+            outlineColor = "green";
+        } else if (enemy.isBuffed) {
+            outlineColor = "blue";
+        }
+        ctx.strokeStyle = outlineColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
 
-                    if (enemy.type === 'sniper' && enemy.targetLineVisible) {
-                        ctx.beginPath();
-                        ctx.moveTo(enemy.x, enemy.y);
-                        ctx.lineTo(game.player.x, game.player.y);
-                        ctx.strokeStyle = "red";
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
+        if (enemy.type === 'sniper' && enemy.targetLineVisible) {
+            ctx.beginPath();
+            ctx.moveTo(enemy.x, enemy.y);
+            ctx.lineTo(game.player.x, game.player.y);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+        }
 
-                    if (enemy.healthBarVisible) {
-                        ctx.fillStyle = "hsl(0, 70%, 60%)";
-                        ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius - 10, enemy.radius * 2 * (enemy.health / 100), 5);
-                    }
-                });
+        if (enemy.healthBarVisible) {
+            ctx.fillStyle = "hsl(0, 70%, 60%)";
+            ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius - 10, enemy.radius * 2 * (enemy.health / 100), 5);
+        }
+    });
 
-                game.bullets.concat(game.enemyBullets).forEach(bullet => {
-                    ctx.beginPath();
-                    ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = bullet.color;
-                    ctx.fill();
-                    ctx.strokeStyle = `hsl(${getHue(bullet.color)}, 70%, ${getLightness(bullet.color) - 20}%)`;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                    ctx.closePath();
-                });
+    game.bullets.concat(game.enemyBullets).forEach(bullet => {
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bullet.color;
+        ctx.fill();
+        ctx.strokeStyle = `hsl(${getHue(bullet.color)}, 70%, ${getLightness(bullet.color) - 20}%)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.closePath();
+    });
 
-                game.effects.drawEffects();
+    game.effects.drawEffects();
 
-                ctx.fillStyle = "black";
-                ctx.font = "20px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText(`${score}`, canvas.width / 2, 30);
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(`${score}`, canvas.width / 2, 30);
             },
 
             gameLoop: function() {
@@ -2416,7 +2416,7 @@ pauseModal.appendChild(mainmenuButton);
     gameOverModal.style.textAlign = "center";
 
     const gameOverText = document.createElement('h2');
-    gameOverText.innerText = "ㅤㅤㅤㅤ게임 오버ㅤㅤㅤㅤ";
+    gameOverText.innerText = "게임 오버 / GAME OVER";
     gameOverModal.appendChild(gameOverText);
 
     const scoreText = document.createElement('p');
