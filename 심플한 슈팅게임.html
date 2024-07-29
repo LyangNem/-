@@ -849,7 +849,7 @@ function returnToMainMenu() {
                     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                     ctx.fillStyle = this.isDashing ? "hsl(195, 70%, 70%)" : this.color;
                     ctx.fill();
-                    ctx.strokeStyle = this.isParrying ? "rgba(0, 128, 255, 0.5)" : (this.isDebuffed ? this.debuffColor : "hsl(195, 70%, 75%)");
+                    ctx.strokeStyle = this.isParrying ? "blue" : (this.isDebuffed ? this.debuffColor : "hsl(195, 70%, 75%)");
                     ctx.lineWidth = 2;
                     ctx.stroke();
                     ctx.closePath();
@@ -858,7 +858,7 @@ function returnToMainMenu() {
                 drawUI: function() {
                     ctx.fillStyle = "red";
                     ctx.fillRect(this.x - this.radius, this.y + this.radius + 10, this.radius * 2 * (this.health / 100), 5);
-                    ctx.fillStyle = "rgba(0, 128, 255, 0.5)";
+                    ctx.fillStyle = "blue";
                     ctx.fillRect(this.x - this.radius, this.y + this.radius + 20, this.radius * 2 * (this.parryCooldown / 300), 5);
                     ctx.fillStyle = "green";
                     ctx.fillRect(this.x - this.radius, this.y + this.radius + 30, this.radius * 2 * (this.dashesLeft / 5), 5);
@@ -1307,7 +1307,7 @@ function returnToMainMenu() {
                                 speed: 5,
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
-                                damage: 10
+                                damage: 5
                             });
                             enemy.shootCooldown = enemy.shootCooldownValue;
                         } else {
@@ -1328,7 +1328,7 @@ function returnToMainMenu() {
                     speed: 2,
                     type: 'fast',
                     shootCooldown: 90,
-                    damage: 1,
+                    damage: 5,
                     spawnRate: 1,
                     scoreValue: 60,
                     bodyStrength: 0.5,
@@ -1356,7 +1356,7 @@ function returnToMainMenu() {
                                     y: enemy.y,
                                     radius: 5,
                                     color: enemy.color,
-                                    speed: 10,
+                                    speed: 5,
                                     dx: Math.cos(angle + i * spread),
                                     dy: Math.sin(angle + i * spread),
                                     damage: enemy.damage
@@ -2067,7 +2067,7 @@ function returnToMainMenu() {
 
                 game.utils.separateEnemies();
 
-                score++;
+                score+=5;
                 if (score % game.summonSpeed === 0) {
                     game.spawnEnemy();
                 }
@@ -2183,6 +2183,7 @@ function returnToMainMenu() {
                 game.player.speed = game.player.basespeed;
                 game.player.defaultSpeed = game.player.basedefaultSpeed;
                 game.player.weapon = null; // 무기 초기화
+                collectedItems = [];
 
                 // 무기 속성 초기화
                 Object.keys(game.weapons).forEach(weaponName => {
@@ -2415,7 +2416,7 @@ pauseModal.appendChild(mainmenuButton);
     gameOverModal.style.textAlign = "center";
 
     const gameOverText = document.createElement('h2');
-    gameOverText.innerText = "게임 오버 / GAME OVER";
+    gameOverText.innerText = "ㅤㅤㅤㅤ게임 오버ㅤㅤㅤㅤ";
     gameOverModal.appendChild(gameOverText);
 
     const scoreText = document.createElement('p');
@@ -2437,10 +2438,11 @@ pauseModal.appendChild(mainmenuButton);
         noItemsElement.innerText = '아이템 없음';
         inventoryList.appendChild(noItemsElement);
     } else {
-        collectedItems.forEach(item => {
+        for (let itemName in itemCounts) {
             const listItem = document.createElement('p');
-            listItem.innerText = `${item.name} [ ${itemCounts[item.name]} ]`;
+            listItem.innerText = `${itemName} [ ${itemCounts[itemName]} ]`;
 
+            const item = collectedItems.find(i => i.name === itemName);
             switch (item.rarity) {
                 case 'rare':
                     listItem.style.color = 'cyan';
@@ -2457,8 +2459,9 @@ pauseModal.appendChild(mainmenuButton);
 
             listItem.style.margin = '5px 0';
             inventoryList.appendChild(listItem);
-        });
+        }
     }
+
     gameOverModal.appendChild(inventoryList);
 
     const retryButton = document.createElement('button');
