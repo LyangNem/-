@@ -404,7 +404,7 @@
                         this.description = "[ 두번째 기회 전용 ]\n레이저의 크기가 35% 증가합니다.";
                     } else if (weaponName === 'cycle') {
                         this.name = "주기 감소";
-                        this.description = "[ 순환 전용 ]\n순환구가 1개 증가하지만, 회전 속도가 30% 감소합니다.";
+                        this.description = "[ 순환 전용 ]\n순환구가 1개 증가하지만, 회전 거리가 15% 감소합니다.";
                     } else {
                         this.name = "전용 강화";
                         this.description = "현재 무기에는 특별한 스킬이 없습니다.";
@@ -434,8 +434,14 @@
                         game.weapons.secondchance.laserthickness += game.weapons.secondchance.baselaserthickness * 0.35;
                     } else if (selectedWeaponName === 'cycle') {
                         game.weapons.cycle.cyclecount += 1;
-                        game.weapons.cycle.cyclesecond += game.weapons.cycle.basecyclesecond * 0.3;
-                        game.weapons.cycle.Ecyclesecond += game.weapons.cycle.baseEcyclesecond * 0.3;
+                        game.weapons.cycle.cycledistance -= game.weapons.cycle.basecycledistance * 0.15;
+                        game.weapons.cycle.Ecycledistance -= game.weapons.cycle.baseEcycledistance * 0.15;
+                        if (game.player.weapon.Ecycledistance < 15) {
+                            game.player.weapon.Ecycledistance = 15;
+                        }
+                        if (game.player.weapon.cycledistance < 15) {
+                            game.player.weapon.cycledistance = 15;
+                        }
                     }
                     collectedItems.push(this);
                 }
@@ -487,7 +493,7 @@
                 common: 0.4,
                 rare: 0.3,
                 epic: 0.2,
-                legendary: 0.1
+                legendary: 100
             };
 
             function getRandomItem() {
@@ -2433,6 +2439,27 @@
                     }
                     if (weapon.basecooldown) {
                         weapon.cooldown = weapon.basecooldown;
+                    }
+                    if (weapon.basecyclecount) {
+                        weapon.cyclecount = weapon.basecyclecount;
+                    }
+                    if (weapon.basecyclesecond) {
+                        weapon.cyclesecond = weapon.basecyclesecond;
+                    }
+                    if (weapon.basecycledistance) {
+                        weapon.cycledistance = weapon.basecycledistance;
+                    }
+                    if (weapon.baseEcyclecount) {
+                        weapon.Ecyclecount = weapon.baseEcyclecount;
+                    }
+                    if (weapon.baseEcyclesecond) {
+                        weapon.Ecyclesecond = weapon.baseEcyclesecond;
+                    }
+                    if (weapon.baseEcycledistance) {
+                        weapon.Ecycledistance = weapon.baseEcycledistance;
+                    }
+                    if (weapon.isCycling) {
+                        weapon.isCycling = false;
                     }
                 });
 
