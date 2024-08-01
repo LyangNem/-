@@ -156,6 +156,8 @@
         </p>
     </div>
 
+    <div id="playerHealth" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 18px; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 5px 10px; border-radius: 5px;"></div>
+
     <div id="weaponDescription"></div>
 
     <div id="functionFive">
@@ -182,19 +184,33 @@
         <h2>일시정지</h2>
         <button onclick="resumeGame()">게임 계속하기</button>
         <button onclick="closeTab()">게임 종료</button>
-        <h3>먹은 아이템들:</h3>
+        <h3>휙득한 아이템:</h3>
         <ul id="collectedItemsList"></ul>
     </div>
 
     <div id="gameOverMenu">
         <h2>게임 오버!</h2>
         <p>당신의 점수: <span id="finalScore"></span></p>
-        <h3>먹은 아이템들:</h3>
+        <h3>휙득한 아이템:</h3>
         <ul id="gameOverItemsList"></ul>
         <button onclick="returnToMainMenu()">메인 메뉴로 돌아가기</button>
     </div>
 
     <script>
+
+    function updatePlayerHealthDisplay() {
+    const playerHealthDiv = document.getElementById('playerHealth');
+
+    const damagenow = Math.round(game.player.weapon.damage * 100) / 100;
+
+    if (game.player.weapon.name === '두번째 기회') {
+        const laserdamagenow = Math.round(game.player.weapon.laserdamage * 100) / 100;
+        playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow} | 레이저 피해량 : ${laserdamagenow}`;
+    } else {
+        playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow}`;
+    }
+}
+
         document.addEventListener("DOMContentLoaded", function() {
             const itemSelectionDiv = document.getElementById('itemSelection');
         });
@@ -246,6 +262,16 @@
         }
 
         const sampleItems = {
+            speedup: {
+                name: "속도 증가",
+                description: "이동속도가 8% 증가합니다.",
+                rarity: "common",
+                apply: function() {
+                    game.player.speed += game.player.basespeed * 0.08;
+                    game.player.defaultSpeed += game.player.basespeed * 0.08;
+                    collectedItems.push(this);
+                }
+            },
             healthBoost: {
                 name: "체력 회복",
                 description: "플레이어의 체력을 40 회복합니다.",
@@ -298,6 +324,15 @@
                     collectedItems.push(this);
                 }
             },
+            monstrance: {
+                name: "후광",
+                description: "공격 시 주변 적에게 공격력의 15%의 피해를 줍니다.",
+                rarity: "rare",
+                apply: function() {
+                    collectedItems.push(this);
+                    game.player.has_monstrance += 1;
+                }
+            },
             damageBoostpack: {
                 name: "공격력 강화 팩",
                 description: "무기의 데미지를 12% 증가시킵니다.",
@@ -341,10 +376,10 @@
             },
             controlRecoil: {
                 name: "반동제어",
-                description: "공격속도가 10% 빨라집니다.",
+                description: "공격속도가 8% 빨라집니다.",
                 rarity: "epic",
                 apply: function() {
-                    game.player.weapon.cooldown -= game.player.weapon.basecooldown * 0.1;
+                    game.player.weapon.cooldown -= game.player.weapon.basecooldown * 0.08;
                     if (game.player.weapon.cooldown < 1) {
                         game.player.weapon.cooldown = 1;
                     }
@@ -353,20 +388,55 @@
             },
             speedBoost: {
                 name: "빠른 움직임",
-                description: "이동속도가 8% 빨라집니다.",
+                description: "이동속도가 12% 빨라집니다.",
                 rarity: "rare",
                 apply: function() {
-                    game.player.speed += game.player.basespeed * 0.08;
-                    game.player.defaultSpeed += game.player.basespeed * 0.08;
+                    game.player.speed += game.player.basespeed * 0.12;
+                    game.player.defaultSpeed += game.player.basespeed * 0.12;
+                    collectedItems.push(this);
+                }
+            },
+            lastdance: {
+                name: "마지막 춤",
+                description: "체력이 10% 아래로 내려가면 이동속도 및 공격 속도 증가 15%를 부여받습니다.",
+                rarity: "epic",
+                apply: function() {
+                    if (game.player.lastDanceApplied === true) {
+                        game.player.speed -= (game.player.basespeed * 0.15) * game.player.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.15) * game.player.lastDanceCount;
+                        game.player.weapon.cooldown += (game.player.weapon.basecooldown * 0.15) * game.player.lastDanceCount;
+                        game.player.lastDanceApplied = false;
+                    }
+                    game.player.lastDanceCount += 1;
                     collectedItems.push(this);
                 }
             },
             parryBoost: {
                 name: "쿨다운 가속",
-                description: "쉴드의 쿨다운 속도가 50% 증가합니다.",
+                description: "쉴드의 쿨다운 속도가 70% 증가합니다.",
                 rarity: "legendary",
                 apply: function() {
-                    game.player.parryCooldownspeed += game.player.baseparryCooldownspeed * 0.5;
+                    game.player.parryCooldownspeed += game.player.baseparryCooldownspeed * 0.7;
+                    collectedItems.push(this);
+                }
+            },
+            critical: {
+                name: "치명타",
+                description: "탄속 및 피해량이 18% 증가합니다.",
+                rarity: "legendary",
+                apply: function() {
+                    game.player.weapon.damage -= game.player.weapon.basedamage * 0.18;
+                    game.player.weapon.speed += game.player.weapon.basespeed * 0.18;
+                    collectedItems.push(this);
+                }
+            },
+            speedup: {
+                name: "속도 증가",
+                description: "이동속도가 8% 증가합니다.",
+                rarity: "common",
+                apply: function() {
+                    game.player.speed += game.player.basespeed * 0.08;
+                    game.player.defaultSpeed += game.player.basespeed * 0.08;
                     collectedItems.push(this);
                 }
             },
@@ -376,8 +446,8 @@
                 rarity: "legendary",
                 update: function(weaponName) {
                     if (weaponName === 'multishot') {
-                        this.name = "다다익선";
-                        this.description = "[ 다중 발사 전용 ]\n탄환의 개수가 4개 증가합니다.";
+                        this.name = "후방주의";
+                        this.description = "[ 다중 발사 전용 ]\n뒤로도 총알을 4발 발사합니다.";
                     } else if (weaponName === 'spray') {
                         this.name = "피어스";
                         this.description = "[ 스프레이 전용 ]\n탄환이 한명의 적을 관통합니다.";
@@ -412,7 +482,7 @@
                 },
                 apply: function() {
                     if (selectedWeaponName === 'multishot') {
-                        game.weapons.multishot.spread += 4;
+                        game.weapons.multishot.backShotCount += 4;
                     } else if (selectedWeaponName === 'spray') {
                         game.weapons.spray.pierce += 1;
                     } else if (selectedWeaponName === 'strike') {
@@ -657,7 +727,7 @@
             },
 
             handleExplosion: function(x, y, damage, source, weapon) {
-                let explosionRadius = 50;
+                let explosionRadius = 30;
                 let maxDamage = damage;
                 let minDamage = damage * 0.25;
 
@@ -771,6 +841,23 @@
                     }
                 });
             },
+            handleSwordEffectDamageOfMonstrance: function(x, y, radius) {
+                const effect = {
+                    x: x,
+                    y: y,
+                    radius: radius
+                };
+                game.enemies.forEach((enemy, index) => {
+                    if (game.utils.circleCollisionOfMonstrance(effect, enemy)) {
+                        enemy.health -= (game.player.weapon.damage * 0.15) * game.player.has_monstrance;
+                        if (enemy.health <= 0) {
+                            enemy.handleDeath(index);
+                        } else {
+                            enemy.healthBarVisible = true;
+                        }
+                    }
+                });
+            },
             player: {
                 x: canvas.width / 2,
                 y: canvas.height - 30,
@@ -798,6 +885,9 @@
                 isDebuffed: false,
                 debuffColor: null,
                 debuffDuration: 0,
+                lastDanceCount: 0,
+                lastDanceApplied: false,
+                has_monstrance: 0,
 
                 selectWeapon: function(weaponName) {
                     this.weapon = game.weapons[weaponName];
@@ -814,6 +904,24 @@
                 update: function() {
                     this.handleMovement();
                     this.handleStatus();
+
+                    if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.1) {
+                        game.player.speed += (game.player.basespeed * 0.15) * this.lastDanceCount;
+                        game.player.defaultSpeed += (game.player.basespeed * 0.15) * this.lastDanceCount;
+                        game.player.weapon.cooldown -= (game.player.weapon.basecooldown * 0.15) * this.lastDanceCount;
+                    if (game.player.weapon.cooldown < 1) {
+                        game.player.weapon.cooldown = 1;
+                        }
+                        this.lastDanceApplied = true;
+                    }
+                    if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.1) {
+                        game.player.speed -= (game.player.basespeed * 0.15) * this.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.15) * this.lastDanceCount;
+                        game.player.weapon.cooldown += (game.player.weapon.basecooldown * 0.15) * this.lastDanceCount;
+                        this.lastDanceApplied = false;
+                }
+
+                    updatePlayerHealthDisplay();
                     if (this.health <= 0) {
                         gameOver();
                     }
@@ -896,7 +1004,12 @@
                     let dx = mouseX - this.x;
                     let dy = mouseY - this.y;
                     let angle = Math.atan2(dy, dx);
-
+                    
+                    if(this.has_monstrance >= 1) {
+                        game.effects.createSwordEffect(this.x, this.y, 130);
+                        game.handleSwordEffectDamageOfMonstrance(this.x, this.y, 130);
+                    }
+                    
                     if (this.weapon.name === "내려치기") {
                         game.effects.createSwordEffect(mouseX, mouseY, game.weapons.strike.range);
                         game.handleSwordEffectDamage(mouseX, mouseY, game.weapons.strike.range);
@@ -934,18 +1047,32 @@
             weapons: {
                 multishot: {
                     name: "다중 발사",
-                    basedamage: 30,
+                    basedamage: 40,
                     basespeed: 10,
                     basecooldown: 500,
-                    damage: 30,
+                    damage: 40,
                     speed: 10,
-                    spread: 6,
+                    spread: 8,
                     cooldown: 500,
                     color: "hsl(30, 70%, 60%)",
                     lastShot: 0,
+                    backShotCount: 0,
                     attack: function(angle) {
                         for (let i = 0; i < this.spread; i++) {
                             let spreadAngle = angle + (Math.random() - 0.5) * 0.3;
+                            game.bullets.push({
+                                x: game.player.x,
+                                y: game.player.y,
+                                radius: 5,
+                                color: game.player.color,
+                                speed: this.speed,
+                                dx: Math.cos(spreadAngle),
+                                dy: Math.sin(spreadAngle),
+                                damage: this.damage
+                            });
+                        }
+                        for (let i = 0; i < this.backShotCount; i++) {
+                            let spreadAngle = angle + Math.PI + (Math.random() - 0.5) * 0.3;
                             game.bullets.push({
                                 x: game.player.x,
                                 y: game.player.y,
@@ -1366,6 +1493,12 @@
                     let distance = Math.sqrt(dx * dx + dy * dy);
                     return distance < circle1.radius + circle2.radius + radius;
                 },
+                circleCollisionOfMonstrance: function(circle1, circle2, radius = 0) {
+                    let dx = circle1.x - circle2.x;
+                    let dy = circle1.y - circle2.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    return distance < circle1.radius + circle2.radius + radius;
+                },
                 getClosestEnemy: function(currentEnemy, enemies) {
                     let closestEnemy = null;
                     let closestDist = Infinity;
@@ -1735,9 +1868,9 @@
                     maxHealth: 5,
                     speed: 3.5,
                     type: 'explosive',
-                    damage: 40,
+                    damage: 15,
                     spawnRate: 0.75,
-                    bodyStrength: 0.5,
+                    bodyStrength: 0.35,
                     borderResis: 0,
                     hasExploded: false,
                     move: function(enemy) {
@@ -2404,6 +2537,9 @@
                 game.player.defaultSpeed = game.player.basedefaultSpeed;
                 game.player.weapon = null;
                 collectedItems = [];
+                game.player.lastDanceCount = 0;
+                game.player.lastDanceApplied = false;
+                game.player.has_monstrance= 0;
 
                 // 무기 속성
                 Object.keys(game.weapons).forEach(weaponName => {
@@ -2458,6 +2594,7 @@
                     }
                 });
 
+                game.weapons.multishot.backShotCount = 0;
                 game.enemies = [];
                 game.bullets = [];
                 game.enemyBullets = [];
@@ -2477,7 +2614,7 @@
 
         const weaponDescriptions = {
             multishot: `다중 발사 / MultiShot\n여러 발의 탄환을 동시에 발사합니다.\nDamage ${game.weapons.multishot.damage} × ${game.weapons.multishot.spread}`,
-            spray: `스프레이 / Spray\n거리가 멀수록 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.spray.damage}`,
+            spray: `스프레이 / Spray\n날아갈수록 점점 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.spray.damage}`,
             strike: `내려치기 / Strike\n원하는 지점에 강력한 공격을 가합니다.\nDamage ${game.weapons.strike.damage}`,
             dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 25% × 2`,
             swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}`,
