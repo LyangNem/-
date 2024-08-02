@@ -126,6 +126,18 @@
             font-size: 18px;
             color: black;
         }
+
+        #playerHealth {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
     </style>
     <script>
         window.onload = function() {
@@ -156,7 +168,7 @@
         </p>
     </div>
 
-    <div id="playerHealth" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 18px; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 5px 10px; border-radius: 5px;"></div>
+    <div id="playerHealth"></div>
 
     <div id="weaponDescription"></div>
 
@@ -198,30 +210,56 @@
 
     <script>
 
-    function updatePlayerHealthDisplay() {
-    const playerHealthDiv = document.getElementById('playerHealth');
+    document.addEventListener("DOMContentLoaded", function() {
+        updatePlayerHealthDisplay();
+    });
 
-    const damagenow = Math.round(game.player.weapon.damage * 100) / 100;
+        const arr_sound = [];
+        const hit = [];
 
-    if (game.player.weapon.name === '두번째 기회') {
-        const laserdamagenow = Math.round(game.player.weapon.laserdamage * 100) / 100;
-        playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow} | 레이저 피해량 : ${laserdamagenow}`;
-    } else {
-        playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow}`;
-    }
-}
+        for(let i = 0; i < 10; i++){
+            const shootmp3 = new Audio('https://lyangnem.github.io/-/shoot.mp3');
+            shootmp3.volume = 0.2
+
+            
+            shootmp3.addEventListener('ended', function(){
+                if(window.chrome){this.load();}
+                this.pause();
+            })
+        
+            arr_sound.push(shootmp3);
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const itemSelectionDiv = document.getElementById('itemSelection');
         });
 
-        let gameStarted = false;
-        let gamePaused = false;
+        var gameStarted = false;
+        var gamePaused = false;
         let isGameLoopRunning = false;
         let gameSpeed = 1;
         let collectedItems = [];
         let selectedWeaponName = "";
         let itemCounts = {};
+
+        function updatePlayerHealthDisplay() {
+        const playerHealthDiv = document.getElementById('playerHealth');
+        const best_score = localStorage.getItem('best') || 0;
+    
+        if (!gameStarted) {
+                playerHealthDiv.innerText = `최고기록 : ${best_score}`;
+                return;
+            }
+        
+            const damagenow = Math.round(game.player.weapon.damage * 100) / 100;
+        
+            if (game.player.weapon.name === '두번째 기회') {
+                const laserdamagenow = Math.round(game.player.weapon.laserdamage * 100) / 100;
+                playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow} | 레이저 피해량 : ${laserdamagenow}`;
+            } else {
+                playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow}`;
+            }
+        }
 
         if (gameStarted === false) {
             gamePaused = false;
@@ -247,6 +285,7 @@
             gamePaused = true;
             gameStarted = false;
             game.reset();
+            updatePlayerHealthDisplay();
         }
 
         function showPauseMenu() {
@@ -1000,6 +1039,13 @@
                 attack: function() {
                     let now = Date.now();
                     if (this.weapon.lastShot + this.weapon.cooldown > now) return;
+
+                    for(let i = 0; i < 10; i++){
+                        if(arr_sound[i].paused){
+                            arr_sound[i].play();
+                            break;
+                        }
+                    }
 
                     let dx = mouseX - this.x;
                     let dy = mouseY - this.y;
@@ -2841,10 +2887,21 @@
 
 
         function gameOver() {
+            gameStarted = false;
+            updatePlayerHealthDisplay();
             showGameOverScreen();
         }
 
         function showGameOverScreen() {
+            
+            localStorage.setItem('current', score)
+            var bs = localStorage.getItem('best')
+            if(bs == null) bs = 0;
+            if(score > bs) {
+                alert("최고기록 갱신!")
+                localStorage.setItem('best', score)
+            }
+
             const gameOverModal = document.createElement('div');
             gameOverModal.id = "gameOverModal";
             gameOverModal.style.position = "absolute";
