@@ -464,8 +464,9 @@
                 description: "탄속 및 피해량이 18% 증가합니다.",
                 rarity: "legendary",
                 apply: function() {
-                    game.player.weapon.damage -= game.player.weapon.basedamage * 0.18;
+                    game.player.weapon.damage += game.player.weapon.basedamage * 0.18;
                     game.player.weapon.speed += game.player.weapon.basespeed * 0.18;
+                    game.player.defaultSpeed += game.player.basespeed * 0.18;
                     collectedItems.push(this);
                 }
             },
