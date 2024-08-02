@@ -1347,137 +1347,141 @@
                     }
                 },
                 cycle: {
-                    name: "순환",
-                    basedamage: 40,
-                    basecooldown: 3000,
-                    basecyclesecond: 1.5,
-                    basecycledistance: 150,
-                    basecyclecount: 2,
-                    basecycleradius: 18,
-                    baseEdamage: 40,
-                    baseEcyclesecond: 0.75,
-                    baseEcycledistance: 300,
-                    baseEcycleradius: 18,
-                    damage: 40,
-                    cooldown: 6000,
-                    lastUsed: 0,
-                    cyclesecond: 1.5,
-                    cycledistance: 150,
-                    cyclecount: 2,
-                    cycleradius: 18,
-                    Edamage: 40,
-                    Ecyclesecond: 0.75,
-                    Ecycledistance: 300,
-                    Ecycleradius: 18,
-                    isCycling: false,
-                    cycleDuration: 3000,
-                    cycleStartTime: 0,
-                    circles: [],
-                    currentDistance: 100,
-                    targetDistance: 100,
-                    currentSecond: 2.0,
-                    targetSecond: 2.0,
-                    angle: 0.0,
-                    setup: function() {
-                        for (let i = 0; i < this.cyclecount; i++) {
-                            this.circles.push({
-                                x: 0,
-                                y: 0,
-                                hitEnemies: [],
-                                beforeAngle: 0
-                            });
-                        }
-                    },
-                    attack: function() {
-                        const now = Date.now();
-                        if (now - this.lastUsed > this.cooldown) {
-                            this.isCycling = true;
-                            this.cycleStartTime = now;
-                            this.lastUsed = now;
-                        }
-                    },
-                    draw: function() {
-                        const now = Date.now();
-                        const cycleDistance = this.isCycling ? this.Ecycledistance : this.cycledistance;
+    name: "순환",
+    basedamage: 40,
+    basecooldown: 3000,
+    basecyclesecond: 1.5,
+    basecycledistance: 150,
+    basecyclecount: 2,
+    basecycleradius: 18,
+    baseEdamage: 40,
+    baseEcyclesecond: 0.75,
+    baseEcycledistance: 300,
+    baseEcycleradius: 18,
+    damage: 40,
+    cooldown: 6000,
+    lastUsed: 0,
+    cyclesecond: 1.5,
+    cycledistance: 150,
+    cyclecount: 2,
+    cycleradius: 18,
+    Edamage: 40,
+    Ecyclesecond: 0.75,
+    Ecycledistance: 300,
+    Ecycleradius: 18,
+    isCycling: false,
+    cycleDuration: 3000,
+    cycleStartTime: 0,
+    circles: [],
+    currentDistance: 100,
+    targetDistance: 100,
+    currentSecond: 2.0,
+    targetSecond: 2.0,
+    angle: 0.0,
+    setup: function() {
+        for (let i = 0; i < this.cyclecount; i++) {
+            this.circles.push({
+                x: 0,
+                y: 0,
+                hitEnemies: [],
+                hitTimestamps: [] // 적이 피해를 입은 시간 기록
+            });
+        }
+    },
+    attack: function() {
+        const now = Date.now();
+        if (now - this.lastUsed > this.cooldown) {
+            this.isCycling = true;
+            this.cycleStartTime = now;
+            this.lastUsed = now;
+        }
+    },
+    draw: function() {
+        const now = Date.now();
+        const cycleDistance = this.isCycling ? this.Ecycledistance : this.cycledistance;
 
-                        // 회전 범위
-                        let closestEnemy = null;
-                        let closestDistance = Infinity;
+        // 회전 범위
+        let closestEnemy = null;
+        let closestDistance = Infinity;
 
-                        game.enemies.forEach((enemy) => {
-                            const distanceToPlayer = Math.sqrt(Math.pow(game.player.x - enemy.x, 2) + Math.pow(game.player.y - enemy.y, 2));
-                            if (distanceToPlayer < closestDistance) {
-                                closestDistance = distanceToPlayer;
-                                closestEnemy = enemy;
+        game.enemies.forEach((enemy) => {
+            const distanceToPlayer = Math.sqrt(Math.pow(game.player.x - enemy.x, 2) + Math.pow(game.player.y - enemy.y, 2));
+            if (distanceToPlayer < closestDistance) {
+                closestDistance = distanceToPlayer;
+                closestEnemy = enemy;
+            }
+        });
+
+        if (closestEnemy && closestDistance < cycleDistance - this.cycleradius) {
+            this.targetDistance = closestDistance;
+            this.targetSecond = this.baseEcyclesecond;
+        } else {
+            this.targetSecond = this.isCycling ? this.Ecyclesecond : this.cyclesecond;
+            this.targetDistance = this.isCycling ? this.Ecycledistance : this.cycledistance;
+        }
+
+        // 점진 값 변화
+        this.currentDistance += (this.targetDistance - this.currentDistance) * 0.2;
+        this.currentSecond += (this.targetSecond - this.currentSecond) * 0.05;
+
+        for (let i = 0; i < this.cyclecount; i++) {
+            const circle = this.circles[i];
+            if (!circle) continue;
+            for (let j = 0; j < 100; j++) {
+                this.angle += 2 * Math.PI / this.currentSecond / 6000;
+                circle.x = game.player.x + Math.cos(this.angle + 2 * i * Math.PI / this.cyclecount) * this.currentDistance;
+                circle.y = game.player.y + Math.sin(this.angle + 2 * i * Math.PI / this.cyclecount) * this.currentDistance;
+
+                // 충돌 체크 및 피해 처리
+                game.enemies.forEach((enemy, index) => {
+                    if (circle) {
+                        if (game.utils.circleCollision({
+                                x: circle.x,
+                                y: circle.y,
+                                radius: this.isCycling ? this.cycleradius : this.Ecycleradius
+                            }, enemy)) {
+                            const now = Date.now();
+                            const lastHitTime = circle.hitTimestamps[enemy.id] || 0;
+                            const hitCooldown = 200;
+
+                            if (now - lastHitTime > hitCooldown) {
+                                if (this.isCycling && now - this.cycleStartTime <= this.cycleDuration) {
+                                    enemy.health -= this.Edamage;
+                                    enemy.x += (enemy.x - game.player.x) * 0.1;
+                                    enemy.y += (enemy.y - game.player.y) * 0.1;
+                                } else {
+                                    enemy.health -= this.damage;
+                                    enemy.x += (enemy.x - game.player.x) * 0.1;
+                                    enemy.y += (enemy.y - game.player.y) * 0.1;
+                                }
+
+                                circle.hitTimestamps[enemy.id] = now;
+
+                                if (enemy.health <= 0) {
+                                    enemy.handleDeath(index);
+                                } else {
+                                    enemy.healthBarVisible = true;
+                                }
                             }
-                        });
-
-                        if (closestEnemy && closestDistance < cycleDistance - this.cycleradius) {
-                            this.targetDistance = closestDistance;
-                            this.targetSecond = this.baseEcyclesecond;
-                        } else {
-                            this.targetSecond = this.isCycling ? this.Ecyclesecond : this.cyclesecond;
-                            this.targetDistance = this.isCycling ? this.Ecycledistance : this.cycledistance;
-                        }
-
-                        // 점진 값 변화
-                        this.currentDistance += (this.targetDistance - this.currentDistance) * 0.2;
-                        this.currentSecond += (this.targetSecond - this.currentSecond) * 0.05;
-
-                        for (let i = 0; i < this.cyclecount; i++) {
-                            const circle = this.circles[i];
-                            if (!circle) continue;
-                            for (let j = 0; j < 100; j++) {
-                                this.angle += 2 * Math.PI / this.currentSecond / 6000;
-                                circle.x = game.player.x + Math.cos(this.angle + 2 * i * Math.PI / this.cyclecount) * this.currentDistance;
-                                circle.y = game.player.y + Math.sin(this.angle + 2 * i * Math.PI / this.cyclecount) * this.currentDistance;
-
-                                // 충돌 체크 및 피해 처리
-                                game.enemies.forEach((enemy, index) => {
-                                    if (circle) {
-                                        if (game.utils.circleCollision({
-                                                x: circle.x,
-                                                y: circle.y,
-                                                radius: this.isCycling ? this.cycleradius : this.Ecycleradius
-                                            }, enemy)) {
-                                            if (!circle.hitEnemies.includes(enemy)) {
-                                                if (this.isCycling && now - this.cycleStartTime <= this.cycleDuration) {
-                                                    enemy.health -= this.Edamage;
-                                                    enemy.x += (enemy.x - game.player.x) * 0.1;
-                                                    enemy.y += (enemy.y - game.player.y) * 0.1;
-                                                } else {
-                                                    enemy.health -= this.damage;
-                                                    enemy.x += (enemy.x - game.player.x) * 0.1;
-                                                    enemy.y += (enemy.y - game.player.y) * 0.1;
-                                                }
-                                                circle.hitEnemies.push(enemy);
-                                                if (enemy.health <= 0) {
-                                                    enemy.handleDeath(index);
-                                                } else {
-                                                    enemy.healthBarVisible = true;
-                                                }
-                                            }
-                                        } else if (circle.hitEnemies.includes(enemy)) {
-                                            circle.hitEnemies.splice(index, 1);
-                                        }
-                                    }
-                                });
-                            }
-                            ctx.beginPath();
-                            ctx.arc(circle.x, circle.y, this.cycleradius, 0, Math.PI * 2);
-                            ctx.fillStyle = (now - this.lastUsed > this.cooldown) ? "hsl(220, 70%, 75%)" : "hsl(0, 70%, 75%)";
-                            ctx.fill();
-                            ctx.strokeStyle = "hsl(230, 70%, 75%)";
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                            ctx.closePath();
-                        }
-
-                        if (this.isCycling && now - this.cycleStartTime > this.cycleDuration) {
-                            this.isCycling = false;
                         }
                     }
-                }
+                });
+            }
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, this.cycleradius, 0, Math.PI * 2);
+            ctx.fillStyle = (now - this.lastUsed > this.cooldown) ? "hsl(220, 70%, 75%)" : "hsl(0, 70%, 75%)";
+            ctx.fill();
+            ctx.strokeStyle = "hsl(230, 70%, 75%)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        if (this.isCycling && now - this.cycleStartTime > this.cycleDuration) {
+            this.isCycling = false;
+        }
+    }
+}
             },
 
             enemies: [],
