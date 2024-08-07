@@ -365,7 +365,7 @@
             },
             monstrance: {
                 name: "후광",
-                description: "공격 시 주변 적에게 공격력의 15%의 피해를 줍니다.",
+                description: "공격 시 주변 적에게 공격력의 10%의 피해를 줍니다.",
                 rarity: "rare",
                 apply: function() {
                     collectedItems.push(this);
@@ -437,13 +437,13 @@
             },
             lastdance: {
                 name: "마지막 춤",
-                description: "체력이 10% 아래로 내려가면 이동속도 및 공격 속도 증가 15%를 부여받습니다.",
+                description: "체력이 10% 아래로 내려가면 이동속도 및 피해량 증가 20%를 부여받습니다.",
                 rarity: "epic",
                 apply: function() {
                     if (game.player.lastDanceApplied === true) {
-                        game.player.speed -= (game.player.basespeed * 0.15) * game.player.lastDanceCount;
-                        game.player.defaultSpeed -= (game.player.basespeed * 0.15) * game.player.lastDanceCount;
-                        game.player.weapon.cooldown += (game.player.weapon.basecooldown * 0.15) * game.player.lastDanceCount;
+                        game.player.speed -= (game.player.basespeed * 0.2) * game.player.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.2) * game.player.lastDanceCount;
+                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.2) * game.player.lastDanceCount;
                         game.player.lastDanceApplied = false;
                     }
                     game.player.lastDanceCount += 1;
@@ -505,7 +505,7 @@
                         this.description = "[ 연쇄 전용 ]\n탄환의 연쇄되는 적의 수가 1명 증가하며, 피해량 감소 폭이 줄어듭니다.";
                     } else if (weaponName === 'absorb') {
                         this.name = "영양 균형";
-                        this.description = "[ 흡수 전용 ]\n최대체력 증가량이 1, 회복량이 2 증가합니다.";
+                        this.description = "[ 흡수 전용 ]\n최대체력 증가량 및 회복량이 1 증가합니다.";
                     } else if (weaponName === 'burst') {
                         this.name = "범위가 넓은";
                         this.description = "[ 터지는 공격 전용 ]\n탄속과 공격 범위가 10% 증가합니다.";
@@ -946,20 +946,17 @@
                     this.handleStatus();
 
                     if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.1) {
-                        game.player.speed += (game.player.basespeed * 0.15) * this.lastDanceCount;
-                        game.player.defaultSpeed += (game.player.basespeed * 0.15) * this.lastDanceCount;
-                        game.player.weapon.cooldown -= (game.player.weapon.basecooldown * 0.15) * this.lastDanceCount;
-                    if (game.player.weapon.cooldown < 1) {
-                        game.player.weapon.cooldown = 1;
-                        }
+                        game.player.speed += (game.player.basespeed * 0.2) * this.lastDanceCount;
+                        game.player.defaultSpeed += (game.player.basespeed * 0.2) * this.lastDanceCount;
+                        game.player.weapon.damage += (game.player.weapon.basedamage * 0.2) * this.lastDanceCount;
                         this.lastDanceApplied = true;
                     }
                     if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.1) {
-                        game.player.speed -= (game.player.basespeed * 0.15) * this.lastDanceCount;
-                        game.player.defaultSpeed -= (game.player.basespeed * 0.15) * this.lastDanceCount;
-                        game.player.weapon.cooldown += (game.player.weapon.basecooldown * 0.15) * this.lastDanceCount;
+                        game.player.speed -= (game.player.basespeed * 0.2) * this.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.2) * this.lastDanceCount;
+                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.2) * this.lastDanceCount;
                         this.lastDanceApplied = false;
-                }
+                    }
 
                     updatePlayerHealthDisplay();
                     if (this.health <= 0) {
@@ -2287,7 +2284,7 @@
                                 console.log(`공격 대미지: ${bullet.damage}`);
                                 if (enemy.health <= 0) {
                                     if (bullet.absorb) {
-                                        game.player.health = Math.min(game.player.health + game.player.maxHealth * 0.015, game.player.maxHealth);
+                                        game.player.health = Math.min(game.player.health + game.player.maxHealth * 0.01, game.player.maxHealth);
                                     }
                                     enemy.handleDeath(enemyIndex);
                                 }
@@ -2670,7 +2667,7 @@
             dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 25% × 2`,
             swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}`,
             chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 약해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}`,
-            absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적을 죽이면 최대체력의 1.5%를 회복합니다.\nDamage ${game.weapons.absorb.damage}`,
+            absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적을 죽이면 최대체력의 1%를 회복합니다.\nDamage ${game.weapons.absorb.damage}`,
             burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
             secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
             cycle: `순환 / Cycle\n순환구가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage} × 2`
