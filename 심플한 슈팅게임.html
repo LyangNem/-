@@ -165,6 +165,7 @@
             <button onmouseover="showDescription('burst')" onmouseout="hideDescription()" onclick="selectWeapon('burst')">터지는 공격</button>
             <button onmouseover="showDescription('secondchance')" onmouseout="hideDescription()" onclick="selectWeapon('secondchance')">두번째 기회</button>
             <button onmouseover="showDescription('cycle')" onmouseout="hideDescription()" onclick="selectWeapon('cycle')">순환</button>
+            <button onmouseover="showDescription('strongshot')" onmouseout="hideDescription()" onclick="selectWeapon('strongshot')">강한 샷</button>
         </p>
     </div>
 
@@ -338,6 +339,7 @@
                 apply: function() {
                     if (game.player.weapon) {
                         game.player.weapon.damage += game.player.weapon.basedamage * 0.08;
+		game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.08;
                         game.weapons.secondchance.laserdamage += game.player.weapon.baselaserdamage * 0.08;
                         collectedItems.push(this);
                     }
@@ -379,6 +381,7 @@
                 apply: function() {
                     if (game.player.weapon) {
                         game.player.weapon.damage += game.player.weapon.basedamage * 0.12;
+		game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.12;
                         game.weapons.secondchance.laserdamage += game.weapons.secondchance.baselaserdamage * 0.12;
                         collectedItems.push(this);
                     }
@@ -405,11 +408,22 @@
             },
             cure: {
                 name: "완치",
-                description: "체력을 150 회복하며, 방어 쿨타임이 초기화됩니다.",
+                description: "체력을 150 및 대시를 4 회복하며, 방어 쿨타임이 초기화됩니다.",
                 rarity: "epic",
                 apply: function() {
                     game.player.health = Math.min(game.player.health + 150, game.player.maxHealth);
+                    game.player.dashesLeft = Math.min(game.player.dashesLeft + 4, game.player.maxDashes);
                     game.player.parryCooldown = 0;
+                    collectedItems.push(this);
+                }
+            },
+            healingBox: {
+                name: "치료상자",
+                description: "체력을 80 회복하며, 최대체력을 50 증가시킵니다.",
+                rarity: "epic",
+                apply: function() {
+                    game.player.maxHealth += 50;
+                    game.player.health = Math.min(game.player.health + 130, game.player.maxHealth);
                     collectedItems.push(this);
                 }
             },
@@ -437,14 +451,15 @@
             },
             lastdance: {
                 name: "마지막 춤",
-                description: "체력이 25% 아래로 내려가면 이동속도 및 피해량 증가 18%를 부여받습니다.",
+                description: "체력이 20% 아래로 내려가면 이동속도 및 피해량 증가 30%를 부여받습니다.",
                 rarity: "epic",
                 apply: function() {
                     if (game.player.lastDanceApplied === true) {
-                        game.player.speed -= (game.player.basespeed * 0.18) * game.player.lastDanceCount;
-                        game.player.defaultSpeed -= (game.player.basespeed * 0.18) * game.player.lastDanceCount;
-                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.18) * game.player.lastDanceCount;
-                        game.player.weapon.laserdamage -= (game.player.weapon.baselaserdamage * 0.18) * game.player.lastDanceCount;
+                        game.player.speed -= (game.player.basespeed * 0.3) * game.player.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.3) * game.player.lastDanceCount;
+                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.3) * game.player.lastDanceCount;
+		game.player.weapon.Edamage -= (game.player.weapon.baseEdamage * 0.3) * game.player.lastDanceCount;
+                        game.player.weapon.laserdamage -= (game.player.weapon.baselaserdamage * 0.3) * game.player.lastDanceCount;
                         game.player.lastDanceApplied = false;
                     }
                     game.player.lastDanceCount += 1;
@@ -466,6 +481,8 @@
                 rarity: "legendary",
                 apply: function() {
                     game.player.weapon.damage += game.player.weapon.basedamage * 0.18;
+	        game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.18;
+                    game.weapons.secondchance.laserdamage += game.weapons.secondchance.baselaserdamage * 0.18;
                     game.player.weapon.speed += game.player.weapon.basespeed * 0.18;
                     game.player.weapon.cyclesecond -= game.player.weapon.basecyclesecond * 0.18;
                         game.player.weapon.Ecyclesecond -= game.player.weapon.baseEcyclesecond * 0.18;
@@ -504,26 +521,29 @@
                         this.description = "[ 내려치기 전용 ]\n내려치기의 공격 범위가 10%, 피해량이 20% 증가합니다.";
                     } else if (weaponName === 'dual') {
                         this.name = "세개";
-                        this.description = "[ 두개 전용 ]\n탄환의 개수가 1개 증가하지만, 공격속도가 15% 감소합니다.";
+                        this.description = "[ 두개 전용 ]\n탄환의 개수가 1개 증가합니다.";
                     } else if (weaponName === 'swing') {
                         this.name = "그것은 매우 강한!";
-                        this.description = "[ 휘두르다 전용 ]\n공격 범위가 10% 증가합니다.";
+                        this.description = "[ 휘두르다 전용 ]\n공격 범위가 15% 증가합니다.";
                     } else if (weaponName === 'chain') {
                         this.name = "추가 연쇄";
-                        this.description = "[ 연쇄 전용 ]\n탄환의 연쇄되는 적의 수가 1명 증가하며, 피해량 감소 폭이 줄어듭니다.";
+                        this.description = "[ 연쇄 전용 ]\n탄환의 연쇄되는 적의 수가 1명 증가합니다.";
                     } else if (weaponName === 'absorb') {
                         this.name = "영양 균형";
-                        this.description = "[ 흡수 전용 ]\n최대체력 증가량 및 회복량이 1 증가합니다.";
+                        this.description = "[ 흡수 전용 ]\n최대체력 증가량이 0.5, 회복량이 1 증가합니다.";
                     } else if (weaponName === 'burst') {
                         this.name = "범위가 넓은";
-                        this.description = "[ 터지는 공격 전용 ]\n탄속과 공격 범위가 10% 증가합니다.";
+                        this.description = "[ 터지는 공격 전용 ]\n탄속과 공격 범위, 피해량이 25% 증가합니다.";
                     } else if (weaponName === 'secondchance') {
                         this.name = "파괴광선";
-                        this.description = "[ 두번째 기회 전용 ]\n레이저의 크기가 35% 증가합니다.";
+                        this.description = "[ 두번째 기회 전용 ]\n레이저의 크기가 35%, 레이저 피해량이 15% 증가합니다.";
                     } else if (weaponName === 'cycle') {
                         this.name = "주기 감소";
-                        this.description = "[ 순환 전용 ]\n순환구가 1개 증가하지만, 회전 거리가 15% 감소합니다.";
-                    } else {
+                        this.description = "[ 순환 전용 ]\n순환구가 1개 증가합니다.";
+                    } else if (weaponName === 'strongshot') {
+                        this.name = "더 강한 샷";
+                        this.description = "[ 강한 샷 전용 ]\n폭발 범위가 20% 증가합니다.";
+                    }else {
                         this.name = "전용 강화";
                         this.description = "현재 무기에는 특별한 스킬이 없습니다.";
                     }
@@ -537,29 +557,33 @@
                         game.weapons.strike.damage += game.weapons.strike.basedamage * 0.2;
                         game.weapons.strike.range += game.weapons.strike.baserange * 0.1;
                     } else if (selectedWeaponName === 'dual') {
-                        game.player.weapon.cooldown += game.player.weapon.basecooldown * 0.15;
                         game.weapons.dual.bullets += 1;
                     } else if (selectedWeaponName === 'swing') {
-                        game.weapons.swing.range += game.weapons.swing.baserange * 0.1;
+                        game.weapons.swing.range += game.weapons.swing.baserange * 0.15;
                     } else if (selectedWeaponName === 'chain') {
                         game.weapons.chain.chaincount += 1;
                     } else if (selectedWeaponName === 'absorb') {
+			game.weapons.absorb.valueMax += 0.5;
                         game.weapons.absorb.value += 1;
                     } else if (selectedWeaponName === 'burst') {
-                        game.weapons.burst.explosiverange += game.weapons.burst.baseexplosiverange * 0.1;
-                        game.weapons.burst.speed += game.weapons.burst.basespeed * 0.1;
+                        game.weapons.burst.explosiverange += game.weapons.burst.baseexplosiverange * 0.25;
+                        game.weapons.burst.speed += game.weapons.burst.basespeed * 0.25;
+                        game.weapons.burst.damage += game.weapons.burst.basedamage * 0.25;
                     } else if (selectedWeaponName === 'secondchance') {
                         game.weapons.secondchance.laserthickness += game.weapons.secondchance.baselaserthickness * 0.35;
+                        game.weapons.secondchance.laserdamage += game.weapons.secondchance.baselaserdamage * 0.15;
                     } else if (selectedWeaponName === 'cycle') {
                         game.weapons.cycle.cyclecount += 1;
-                        game.weapons.cycle.cycledistance -= game.weapons.cycle.basecycledistance * 0.15;
-                        game.weapons.cycle.Ecycledistance -= game.weapons.cycle.baseEcycledistance * 0.15;
-                        if (game.player.weapon.Ecycledistance < 15) {
-                            game.player.weapon.Ecycledistance = 15;
+                        `game.weapons.cycle.cycledistance -= game.weapons.cycle.basecycledistance * 0.08;
+                        game.weapons.cycle.Ecycledistance -= game.weapons.cycle.baseEcycledistance * 0.08;
+                        if (game.player.weapon.Ecycledistance < 8) {
+                            game.player.weapon.Ecycledistance = 8;
                         }
-                        if (game.player.weapon.cycledistance < 15) {
-                            game.player.weapon.cycledistance = 15;
-                        }
+                        if (game.player.weapon.cycledistance < 8) {
+                            game.player.weapon.cycledistance = 8;
+                        }`
+                    } else if (selectedWeaponName === 'strongshot') {
+                        game.weapons.strongshot.explosiverange += game.weapons.strongshot.baseexplosiverange * 0.2;
                     }
                     collectedItems.push(this);
                 }
@@ -783,6 +807,8 @@
                     explosionRadius = game.weapons.burst.explosiverange;
                 } else if (weapon === 'dual') {
                     explosionRadius = 40;
+                } else if (weapon === 'strongshot') {
+                    explosionRadius = game.weapons.strongshot.explosiverange;
                 }
 
                 game.effects.createExplosionEffect(x, y, explosionRadius);
@@ -808,7 +834,9 @@
                             if (weapon === 'burst') {
                                 dmg = minDamage + (maxDamage - minDamage) * (1 - dist / explosionRadius);
                             } else if (weapon === 'dual') {
-                                dmg = damage * 0.25;
+                                dmg = damage;
+                            } else if (weapon === 'strongshot') {
+                                dmg = game.weapons.strongshot.damage * 0.5;
                             }
                             enemy.health -= dmg;
                             if (enemy.health <= 0) {
@@ -953,18 +981,20 @@
                     this.handleMovement();
                     this.handleStatus();
 
-                    if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.25) {
-                        game.player.speed += (game.player.basespeed * 0.12) * this.lastDanceCount;
-                        game.player.defaultSpeed += (game.player.basespeed * 0.12) * this.lastDanceCount;
-                        game.player.weapon.damage += (game.player.weapon.basedamage * 0.12) * this.lastDanceCount;
-                        game.player.weapon.laserdamage += (game.player.weapon.baselaserdamage * 0.12) * this.lastDanceCount;
+                    if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.2) {
+                        game.player.speed += (game.player.basespeed * 0.3) * this.lastDanceCount;
+                        game.player.defaultSpeed += (game.player.basespeed * 0.3) * this.lastDanceCount;
+                        game.player.weapon.damage += (game.player.weapon.basedamage * 0.3) * this.lastDanceCount;
+		game.player.weapon.Edamage += (game.player.weapon.baseEdamage * 0.3) * this.lastDanceCount;
+                        game.player.weapon.laserdamage += (game.player.weapon.baselaserdamage * 0.3) * this.lastDanceCount;
                         this.lastDanceApplied = true;
                     }
-                    if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.25) {
-                        game.player.speed -= (game.player.basespeed * 0.12) * this.lastDanceCount;
-                        game.player.defaultSpeed -= (game.player.basespeed * 0.12) * this.lastDanceCount;
-                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.12) * this.lastDanceCount;
-                        game.player.weapon.laserdamage -= (game.player.weapon.baselaserdamage * 0.12) * this.lastDanceCount;
+                    if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.2) {
+                        game.player.speed -= (game.player.basespeed * 0.3) * this.lastDanceCount;
+                        game.player.defaultSpeed -= (game.player.basespeed * 0.3) * this.lastDanceCount;
+                        game.player.weapon.damage -= (game.player.weapon.basedamage * 0.3) * this.lastDanceCount;
+                        game.player.weapon.Edamage -= (game.player.weapon.baseEdamage * 0.3) * this.lastDanceCount;
+                        game.player.weapon.laserdamage -= (game.player.weapon.baselaserdamage * 0.3) * this.lastDanceCount;
                         this.lastDanceApplied = false;
                     }
 
@@ -1142,13 +1172,13 @@
                 },
                 automatic: {
                     name: "자동의",
-                    basedamage: 80,
+                    basedamage: 60,
                     basespeed: 20,
-                    basecooldown: 150,
-                    damage: 80,
+                    basecooldown: 100,
+                    damage: 60,
                     speed: 20,
                     spread: 0.1,
-                    cooldown: 150,
+                    cooldown: 100,
                     color: "hsl(0, 0%, 70%)",
                     lastShot: 0,
                     pierce: 0,
@@ -1158,7 +1188,7 @@
                             game.bullets.push({
                                 x: game.player.x,
                                 y: game.player.y,
-                                radius: 10,
+                                radius: 12.5,
                                 color: game.player.color,
                                 speed: this.speed,
                                 dx: Math.cos(spreadAngle),
@@ -1174,27 +1204,27 @@
                 },
                 strike: {
                     name: "내려치기",
-                    basedamage: 80,
+                    basedamage: 100,
                     basespeed: 0,
                     basecooldown: 400,
-                    baserange: 40,
-                    damage: 80,
+                    baserange: 60,
+                    damage: 100,
                     speed: 0,
                     spread: 0,
                     cooldown: 400,
                     color: "hsl(0, 0%, 75%)",
                     lastShot: 0,
-                    range: 40,
+                    range: 60,
                     attack: function(angle) {
                         // 내려치기는 탄환이 없음
                     }
                 },
                 dual: {
                     name: "두개",
-                    basedamage: 32,
+                    basedamage: 20,
                     basespeed: 15,
                     basecooldown: 320,
-                    damage: 32,
+                    damage: 20,
                     speed: 15,
                     spread: 0,
                     cooldown: 320,
@@ -1246,10 +1276,10 @@
                 },
                 chain: {
                     name: "연쇄",
-                    basedamage: 100,
+                    basedamage: 60,
                     basespeed: 12,
                     basecooldown: 600,
-                    damage: 100,
+                    damage: 60,
                     speed: 12,
                     spread: 1,
                     chaincount: 4,
@@ -1276,15 +1306,16 @@
                 },
                 absorb: {
                     name: "흡수",
-                    basedamage: 40,
+                    basedamage: 50,
                     basespeed: 15,
-                    basecooldown: 500,
-                    damage: 40,
+                    basecooldown: 550,
+                    damage: 50,
                     speed: 15,
                     cooldown: 350,
                     color: "hsl(300, 70%, 60%)",
                     lastShot: 0,
                     value: 3,
+		    valueMax: 3,
                     attack: function(angle) {
                         game.bullets.push({
                             x: game.player.x,
@@ -1301,11 +1332,11 @@
                 },
                 burst: {
                     name: "터지는 공격",
-                    basedamage: 300,
+                    basedamage: 350,
                     basespeed: 10,
-                    basecooldown: 1000,
+                    basecooldown: 850,
                     baseexplosiverange: 150,
-                    damage: 300,
+                    damage: 350,
                     speed: 10,
                     cooldown: 1000,
                     color: "hsl(0, 70%, 60%)",
@@ -1315,7 +1346,7 @@
                         game.bullets.push({
                             x: game.player.x,
                             y: game.player.y,
-                            radius: 10,
+                            radius: 15,
                             color: game.player.color,
                             speed: this.speed,
                             dx: Math.cos(angle),
@@ -1450,7 +1481,7 @@
                             }, enemy)) {
                             const now = Date.now();
                             const lastHitTime = circle.hitTimestamps[enemy.id] || 0;
-                            const hitCooldown = 200;
+                            const hitCooldown = 50;
 
                             if (now - lastHitTime > hitCooldown) {
                                 if (this.isCycling && now - this.cycleStartTime <= this.cycleDuration) {
@@ -1488,6 +1519,35 @@
         if (this.isCycling && now - this.cycleStartTime > this.cycleDuration) {
             this.isCycling = false;
         }
+    }
+},
+strongshot: {
+    name: "강한 샷",
+    basedamage: 200,
+    basespeed: 12,
+    basecooldown: 1000,
+    baseexplosiverange: 50,
+    damage: 200,
+    speed: 12,
+    cooldown: 1000,
+    color: "hsl(10, 80%, 50%)",
+    lastShot: 0,
+    pierce: 1000,
+    explosiverange: 50,
+    attack: function(angle) {
+        game.bullets.push({
+            x: game.player.x,
+            y: game.player.y,
+            radius: 30,
+            color: game.player.color,
+            speed: this.speed,
+            dx: Math.cos(angle),
+            dy: Math.sin(angle),
+            damage: this.damage,
+            pierce: this.pierce,
+            explosive: 'strongshot',
+            hitEnemies: []
+        });
     }
 }
             },
@@ -1965,11 +2025,11 @@
                 debuffer: {
                     radius: 20,
                     color: "hsl(90, 70%, 60%)",
-                    health: 120,
-                    maxHealth: 120,
+                    health: 100,
+                    maxHealth: 100,
                     speed: 1.5,
                     type: 'debuffer',
-                    shootCooldown: 180,
+                    shootCooldown: 90,
                     spawnRate: 0.7,
                     scoreValue: 70,
                     bodyStrength: 1.3,
@@ -2294,13 +2354,13 @@
                                 console.log(`공격 대미지: ${bullet.damage}`);
                                 if (enemy.health <= 0) {
                                     if (bullet.absorb) {
-                                        game.player.health = Math.min(game.player.health + game.player.maxHealth * 0.0075, game.player.maxHealth);
+                                        game.player.health = Math.min(game.player.health + game.player.maxHealth * 0.0025, game.player.maxHealth);
                                     }
                                     enemy.handleDeath(enemyIndex);
                                 }
 
                                 if (bullet.absorb) {
-                                    game.player.maxHealth += game.weapons.absorb.value;
+                                    game.player.maxHealth += game.weapons.absorb.valueMax;
                                     game.player.health += game.weapons.absorb.value;
                                 }
 
@@ -2311,9 +2371,10 @@
                                             x: bullet.x,
                                             y: bullet.y,
                                             radius: 0
-                                        }, closestEnemy, 300)) {
+                                        }, closestEnemy, 500)) {
                                         const angle = Math.atan2(closestEnemy.y - bullet.x, closestEnemy.x - bullet.x);
-                                        const newDamage = bullet.damage - (bullet.originalDamage / (game.weapons.chain.chaincount * 2));
+                                        //const newDamage = bullet.damage - (bullet.originalDamage / (game.weapons.chain.chaincount * 2));
+					const newDamage = bullet.damage + (bullet.originalDamage * 0.25);
                                         game.bullets.push({
                                             x: enemy.x,
                                             y: enemy.y,
@@ -2428,7 +2489,7 @@
                                 if (bullet.effect === 'slow') {
                                     game.player.isDebuffed = true;
                                     game.player.debuffColor = bullet.debuffColor;
-                                    game.player.speed *= 0.5;
+                                    game.player.speed *= 0.25;
                                     game.player.debuffDuration = 120;
                                 }
                                 if (bullet.explosive) {
@@ -2480,6 +2541,16 @@
                 if (score % game.summonSpeed === 0) {
                     game.spawnEnemy();
                 }
+	        if (score % game.summonSpeed === 0 && score >= 45000) {
+                    game.spawnEnemy();
+                }
+	        if (score % game.summonSpeed === 0 && score >= 70000) {
+                    game.spawnEnemy();
+                }
+		if (score % game.summonSpeed === 0 && score >= 90000) {
+                    game.spawnEnemy();
+                }
+
                 if (score % game.summonSpeedDecreaseInterval === 0) {
                     game.updateSummonSpeed();
                 }
@@ -2598,6 +2669,7 @@
                 game.player.lastDanceCount = 0;
                 game.player.lastDanceApplied = false;
                 game.player.has_monstrance= 0;
+	    location.reload();
 
                 // 무기 속성
                 Object.keys(game.weapons).forEach(weaponName => {
@@ -2674,13 +2746,14 @@
             multishot: `다중 발사 / MultiShot\n여러 발의 탄환을 동시에 발사합니다.\nDamage ${game.weapons.multishot.damage} × ${game.weapons.multishot.spread}`,
             automatic: `자동의 / Automatic\n날아갈수록 점점 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.automatic.damage}`,
             strike: `내려치기 / Strike\n원하는 지점에 강력한 공격을 가합니다.\nDamage ${game.weapons.strike.damage}`,
-            dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 25% × 2`,
+            dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 100% × 2`,
             swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}`,
-            chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 약해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}`,
-            absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적을 죽이면 최대체력의 0.75%를 회복합니다.\nDamage ${game.weapons.absorb.damage}`,
+            chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 25% 강해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}`,
+            absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적 처치 시시 최대체력의 0.25%를 회복합니다.\nDamage ${game.weapons.absorb.damage}`,
             burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
             secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
-            cycle: `순환 / Cycle\n순환구가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage} × 2`
+            cycle: `순환 / Cycle\n순환구가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage} × 2`,
+            strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%`
         };
 
         function showDescription(weapon) {
