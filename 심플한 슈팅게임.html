@@ -137,6 +137,16 @@
                 padding: 5px 10px;
                 border-radius: 5px;
             }
+
+            #gameVersion {
+                text-align: right;
+                margin-top: 20px;
+                font-size: 20px;
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                width: 100%;
+            }
         </style>
         <script>
             window.onload = function () {
@@ -152,92 +162,19 @@
         <div id="weaponSelect">
             <h2>무기를 고르다</h2>
             <p>
-                <button
-                    onmouseover="showDescription('multishot')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('multishot')"
-                >
-                    다중 발사
-                </button>
-                <button
-                    onmouseover="showDescription('automatic')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('automatic')"
-                >
-                    자동의
-                </button>
-                <button
-                    onmouseover="showDescription('strike')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('strike')"
-                >
-                    내려치기
-                </button>
-                <button
-                    onmouseover="showDescription('dual')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('dual')"
-                >
-                    두개
-                </button>
-                <button
-                    onmouseover="showDescription('swing')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('swing')"
-                >
-                    휘두르다
-                </button>
-            </p>
-            <p>
-                <button
-                    onmouseover="showDescription('chain')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('chain')"
-                >
-                    연쇄
-                </button>
-                <button
-                    onmouseover="showDescription('absorb')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('absorb')"
-                >
-                    흡수
-                </button>
-                <button
-                    onmouseover="showDescription('burst')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('burst')"
-                >
-                    터지는 공격
-                </button>
-                <button
-                    onmouseover="showDescription('secondchance')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('secondchance')"
-                >
-                    두번째 기회
-                </button>
-                <button
-                    onmouseover="showDescription('cycle')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('cycle')"
-                >
-                    순환
-                </button>
-                <button
-                    onmouseover="showDescription('strongshot')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('strongshot')"
-                >
-                    강한 샷
-                </button>
-		<button
-                    onmouseover="showDescription('tripleimpact')"
-                    onmouseout="hideDescription()"
-                    onclick="selectWeapon('tripleimpact')"
-                >
-                    세번 충격
-                </button>
+                <button onmouseover="showDescription('multishot')" onmouseout="hideDescription()" onclick="selectWeapon('multishot')"> 다중 발사 </button>
+                <button onmouseover="showDescription('automatic')" onmouseout="hideDescription()" onclick="selectWeapon('automatic')"> 자동의 </button>
+                <button onmouseover="showDescription('strike')" onmouseout="hideDescription()" onclick="selectWeapon('strike')"> 내려치기 </button>
+                <button onmouseover="showDescription('dual')" onmouseout="hideDescription()" onclick="selectWeapon('dual')"> 두개 </button>
+                <button onmouseover="showDescription('swing')" onmouseout="hideDescription()" onclick="selectWeapon('swing')"> 휘두르다 </button>
+                <button onmouseover="showDescription('chain')" onmouseout="hideDescription()" onclick="selectWeapon('chain')"> 연쇄 </button>
+            </p><p>
+                <button onmouseover="showDescription('absorb')" onmouseout="hideDescription()" onclick="selectWeapon('absorb')"> 흡수 </button>
+                <button onmouseover="showDescription('burst')" onmouseout="hideDescription()" onclick="selectWeapon('burst')"> 터지는 공격 </button>
+                <button onmouseover="showDescription('secondchance')" onmouseout="hideDescription()" onclick="selectWeapon('secondchance')"> 두번째 기회 </button>
+                <button onmouseover="showDescription('cycle')" onmouseout="hideDescription()" onclick="selectWeapon('cycle')"> 순환 </button>
+                <button onmouseover="showDescription('strongshot')" onmouseout="hideDescription()" onclick="selectWeapon('strongshot')"> 강한 샷 </button>
+		        <button onmouseover="showDescription('tripleimpact')" onmouseout="hideDescription()" onclick="selectWeapon('tripleimpact')"> 세번 충격 </button>
             </p>
         </div>
 
@@ -248,6 +185,8 @@
         <div id="functionFive">
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 방어 / Space : 대시</p>
         </div>
+
+        <div id="gameVersion">v 1.5.3</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
