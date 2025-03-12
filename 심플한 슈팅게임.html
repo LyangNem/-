@@ -535,18 +535,18 @@
                 },
                 lastdance: {
                     name: '마지막 춤',
-                    description: '체력이 20% 아래로 내려가면 이동속도 및 피해량 증가 30%를 부여받습니다.',
+                    description: '체력이 30% 아래로 내려가면 피해량 증가 35%를 부여받습니다.',
                     rarity: 'epic',
                     apply: function () {
                         if (game.player.lastDanceApplied === true) {
-                            game.player.speed -= game.player.basespeed * 0.3 * game.player.lastDanceCount;
-                            game.player.defaultSpeed -= game.player.basespeed * 0.3 * game.player.lastDanceCount;
+                            game.player.speed -= game.player.basespeed * 0.35 * game.player.lastDanceCount;
+                            game.player.defaultSpeed -= game.player.basespeed * 0.35 * game.player.lastDanceCount;
                             game.player.weapon.damage -=
-                                game.player.weapon.basedamage * 0.3 * game.player.lastDanceCount;
+                                game.player.weapon.basedamage * 0.35 * game.player.lastDanceCount;
                             game.player.weapon.Edamage -=
-                                game.player.weapon.baseEdamage * 0.3 * game.player.lastDanceCount;
+                                game.player.weapon.baseEdamage * 0.35 * game.player.lastDanceCount;
                             game.player.weapon.laserdamage -=
-                                game.player.weapon.baselaserdamage * 0.3 * game.player.lastDanceCount;
+                                game.player.weapon.baselaserdamage * 0.35 * game.player.lastDanceCount;
                             game.player.lastDanceApplied = false;
                         }
                         game.player.lastDanceCount += 1;
@@ -1084,22 +1084,22 @@
                         this.handleMovement();
                         this.handleStatus();
 
-                        if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.2) {
-                            game.player.speed += game.player.basespeed * 0.3 * this.lastDanceCount;
-                            game.player.defaultSpeed += game.player.basespeed * 0.3 * this.lastDanceCount;
-                            game.player.weapon.damage += game.player.weapon.basedamage * 0.3 * this.lastDanceCount;
-                            game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.3 * this.lastDanceCount;
+                        if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.3) {
+                            game.player.speed += game.player.basespeed * 0.35 * this.lastDanceCount;
+                            game.player.defaultSpeed += game.player.basespeed * 0.35 * this.lastDanceCount;
+                            game.player.weapon.damage += game.player.weapon.basedamage * 0.35 * this.lastDanceCount;
+                            game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.laserdamage +=
-                                game.player.weapon.baselaserdamage * 0.3 * this.lastDanceCount;
+                                game.player.weapon.baselaserdamage * 0.35 * this.lastDanceCount;
                             this.lastDanceApplied = true;
                         }
-                        if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.2) {
-                            game.player.speed -= game.player.basespeed * 0.3 * this.lastDanceCount;
-                            game.player.defaultSpeed -= game.player.basespeed * 0.3 * this.lastDanceCount;
-                            game.player.weapon.damage -= game.player.weapon.basedamage * 0.3 * this.lastDanceCount;
-                            game.player.weapon.Edamage -= game.player.weapon.baseEdamage * 0.3 * this.lastDanceCount;
+                        if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.3) {
+                            game.player.speed -= game.player.basespeed * 0.35 * this.lastDanceCount;
+                            game.player.defaultSpeed -= game.player.basespeed * 0.35 * this.lastDanceCount;
+                            game.player.weapon.damage -= game.player.weapon.basedamage * 0.35 * this.lastDanceCount;
+                            game.player.weapon.Edamage -= game.player.weapon.baseEdamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.laserdamage -=
-                                game.player.weapon.baselaserdamage * 0.3 * this.lastDanceCount;
+                                game.player.weapon.baselaserdamage * 0.35 * this.lastDanceCount;
                             this.lastDanceApplied = false;
                         }
 
