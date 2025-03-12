@@ -539,8 +539,6 @@
                     rarity: 'epic',
                     apply: function () {
                         if (game.player.lastDanceApplied === true) {
-                            game.player.speed -= game.player.basespeed * 0.35 * game.player.lastDanceCount;
-                            game.player.defaultSpeed -= game.player.basespeed * 0.35 * game.player.lastDanceCount;
                             game.player.weapon.damage -=
                                 game.player.weapon.basedamage * 0.35 * game.player.lastDanceCount;
                             game.player.weapon.Edamage -=
@@ -1085,8 +1083,6 @@
                         this.handleStatus();
 
                         if (this.lastDanceCount > 0 && !this.lastDanceApplied && this.health <= this.maxHealth * 0.3) {
-                            game.player.speed += game.player.basespeed * 0.35 * this.lastDanceCount;
-                            game.player.defaultSpeed += game.player.basespeed * 0.35 * this.lastDanceCount;
                             game.player.weapon.damage += game.player.weapon.basedamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.Edamage += game.player.weapon.baseEdamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.laserdamage +=
@@ -1094,8 +1090,6 @@
                             this.lastDanceApplied = true;
                         }
                         if (this.lastDanceCount > 0 && this.lastDanceApplied && this.health > this.maxHealth * 0.3) {
-                            game.player.speed -= game.player.basespeed * 0.35 * this.lastDanceCount;
-                            game.player.defaultSpeed -= game.player.basespeed * 0.35 * this.lastDanceCount;
                             game.player.weapon.damage -= game.player.weapon.basedamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.Edamage -= game.player.weapon.baseEdamage * 0.35 * this.lastDanceCount;
                             game.player.weapon.laserdamage -=
