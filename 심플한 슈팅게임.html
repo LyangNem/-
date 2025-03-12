@@ -541,8 +541,8 @@
                         this.name = "주기 감소";
                         this.description = "[ 순환 전용 ]\n순환구가 1개 증가합니다.";
                     } else if (weaponName === 'strongshot') {
-                        this.name = "더 강한 샷";
-                        this.description = "[ 강한 샷 전용 ]\n폭발 범위가 20% 증가합니다.";
+                        this.name = "튕긴 샷";
+                        this.description = "[ 강한 샷 전용 ]\n탄환이 벽에 부딪히면 최대 한명의 적을 관통할 수 있는 상태로 반사됩니다.";
                     }else {
                         this.name = "전용 강화";
                         this.description = "현재 무기에는 특별한 스킬이 없습니다.";
@@ -583,7 +583,8 @@
                             game.player.weapon.cycledistance = 8;
                         }`
                     } else if (selectedWeaponName === 'strongshot') {
-                        game.weapons.strongshot.explosiverange += game.weapons.strongshot.baseexplosiverange * 0.2;
+                        game.weapons.strongshot.maxReflections += 1;
+                        game.weapons.strongshot.reflectionpierce += 1;
                     }
                     collectedItems.push(this);
                 }
@@ -1525,15 +1526,17 @@ strongshot: {
     name: "강한 샷",
     basedamage: 200,
     basespeed: 12,
-    basecooldown: 1000,
+    basecooldown: 1200,
     baseexplosiverange: 50,
     damage: 200,
     speed: 12,
-    cooldown: 1000,
+    cooldown: 1200,
     color: "hsl(10, 80%, 50%)",
     lastShot: 0,
     pierce: 1000,
     explosiverange: 50,
+    maxReflections: 0,
+    reflectionpierce: 0,
     attack: function(angle) {
         game.bullets.push({
             x: game.player.x,
@@ -1545,6 +1548,9 @@ strongshot: {
             dy: Math.sin(angle),
             damage: this.damage,
             pierce: this.pierce,
+            reflections: 0,
+            maxReflections: this.maxReflections,
+            reflectionpierce: this.reflectionpierce,
             explosive: 'strongshot',
             hitEnemies: []
         });
@@ -2334,6 +2340,20 @@ strongshot: {
                         bullet.dy = Math.sin(angle);
                     }
 
+                    if (bullet.x - bullet.radius <= 0 || bullet.x + bullet.radius >= canvas.width) {
+            if (bullet.reflections < game.weapons.strongshot.maxReflections) {
+                bullet.dx *= -1;
+                bullet.pierce = bullet.reflectionpierce;
+                bullet.reflections++;
+            }
+        } else if (bullet.y - bullet.radius <= 0 || bullet.y + bullet.radius >= canvas.height) {
+            if (bullet.reflections < game.weapons.strongshot.maxReflections) {
+                bullet.dy *= -1;
+                bullet.pierce = bullet.reflectionpierce;
+                bullet.reflections++;
+            }
+        }
+
                     if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
                         if (bullet.explosive) {
                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, 'weapon', bullet.explosive);
@@ -2547,7 +2567,13 @@ strongshot: {
 	        if (score % game.summonSpeed === 0 && score >= 70000) {
                     game.spawnEnemy();
                 }
-		if (score % game.summonSpeed === 0 && score >= 90000) {
+		    if (score % game.summonSpeed === 0 && score >= 90000) {
+                    game.spawnEnemy();
+                    game.spawnEnemy();
+                }
+                if (score % game.summonSpeed === 0 && score >= 100000) {
+                    game.spawnEnemy();
+                    game.spawnEnemy();
                     game.spawnEnemy();
                 }
 
