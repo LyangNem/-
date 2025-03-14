@@ -197,7 +197,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.0.1</div>
+        <div id="gameVersion">v 2.1.0</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -1662,6 +1662,11 @@
                         currentSecond: 2.0,
                         targetSecond: 2.0,
                         angle: 0.0,
+                        isspeacal: false,
+                        healSP: 3,
+                        speacaldamage: 2,
+                        cycleradiusSP: 27,
+                        cyclesecondSP: 0.3,
                         setup: function () {
                             for (let i = 0; i < this.cyclecount; i++) {
                                 this.circles.push({
@@ -1702,7 +1707,7 @@
                                 this.targetDistance = closestDistance;
                                 this.targetSecond = this.baseEcyclesecond;
                             } else {
-                                this.targetSecond = this.isCycling ? this.Ecyclesecond : this.cyclesecond;
+                                this.targetSecond = this.isCycling ? this.isspeacal ? this.cyclesecondSP : this.Ecyclesecond : this.cyclesecond;
                                 this.targetDistance = this.isCycling ? this.Ecycledistance : this.cycledistance;
                             }
 
@@ -1746,9 +1751,16 @@
                                                         this.isCycling &&
                                                         now - this.cycleStartTime <= this.cycleDuration
                                                     ) {
-                                                        enemy.health -= this.Edamage;
-                                                        enemy.x += (enemy.x - game.player.x) * 0.1;
-                                                        enemy.y += (enemy.y - game.player.y) * 0.1;
+                                                        if (!this.isspeacal) {
+                                                            enemy.health -= this.Edamage;
+                                                            enemy.x += (enemy.x - game.player.x) * 0.1;
+                                                            enemy.y += (enemy.y - game.player.y) * 0.1;
+                                                        } else {
+                                                            enemy.health -= this.Edamage * this.speacaldamage;
+                                                            game.player.health = Math.min(game.player.health + this.healSP, game.player.maxHealth);
+                                                            enemy.x += (enemy.x - game.player.x) * -0.2;
+                                                            enemy.y += (enemy.y - game.player.y) * -0.2;
+                                                        }
                                                     } else {
                                                         enemy.health -= this.damage;
                                                         enemy.x += (enemy.x - game.player.x) * 0.1;
@@ -1780,10 +1792,17 @@
 
                             if (this.isCycling && now - this.cycleStartTime > this.cycleDuration) {
                                 this.isCycling = false;
+                                this.cycleradius = this.basecycleradius
+                                this.isspeacal = false;
                             }
                         },
-                        speacal: function (angle) {
-                            
+                        speacal: function () {
+                            const now = Date.now();
+                            this.isCycling = true;
+                            this.isspeacal = true;
+                            this.cycleradius = this.cycleradiusSP
+                            this.cycleStartTime = now;
+                            this.lastUsed = now;
                         },
                     },
                     strongshot: {
@@ -3247,7 +3266,7 @@
                 absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적 처치 시시 최대체력의 0.25%를 회복합니다.\nDamage ${game.weapons.absorb.damage}`,
                 burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
                 secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
-                cycle: `순환 / Cycle\n순환구가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage} × 2`,
+                cycle: `순환 / Cycle\n순환구가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage}\n\n[ 비범하다! ]\n\n순환 흡수 / AbsorbCycle\n더 크고 강력한 순환구가 맹렬히 회전하며 맞은 적을 넉백하지 않고 끌어당깁니다!`,
                 strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
                 
