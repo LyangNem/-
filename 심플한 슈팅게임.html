@@ -2711,7 +2711,7 @@
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.chain.explosiverange, 'weapon', bullet.explosive);
                                 }
                             }
-                            if(bullet.explosive === 'chainSP' || bullet.explosive === 'strongshot') {
+                            if(bullet.explosive === 'chainSP') {
                                 if (bullet.x - bullet.radius < 0) {
                                         bullet.x = bullet.radius + 1;
                                         bullet.dx *= -1; // X축 반사
@@ -2726,6 +2726,30 @@
                                 } else if (bullet.y + bullet.radius > canvas.height) {
                                         bullet.y = canvas.height - bullet.radius - 1;
                                         bullet.dy *= -1;
+                                }
+                            } else if(bullet.explosive === 'strongshot' && bullet.reflections < bullet.maxReflections) {
+                                if (bullet.x - bullet.radius < 0) {
+                                        bullet.x = bullet.radius + 1;
+                                        bullet.dx *= -1; // X축 반사
+                                        bullet.reflections += 1;
+			    bullet.reflectionpierce -= 1;
+                                } else if (bullet.x + bullet.radius > canvas.width) {
+                                        bullet.x = canvas.width - bullet.radius -1;
+                                        bullet.dx *= -1;
+                                        bullet.reflections += 1;
+			    bullet.reflectionpierce -= 1;
+                                }                               
+
+                                if (bullet.y - bullet.radius < 0) {
+                                        bullet.y = bullet.radius + 1;
+                                        bullet.dy *= -1; // Y축 반사
+                                        bullet.reflections += 1;
+			    bullet.reflectionpierce -= 1;
+                                } else if (bullet.y + bullet.radius > canvas.height) {
+                                        bullet.y = canvas.height - bullet.radius - 1;
+                                        bullet.dy *= -1;
+                                        bullet.reflections += 1;
+			    bullet.reflectionpierce -= 1;
                                 }
                             } else { 
                                 game.bullets.splice(index, 1);
