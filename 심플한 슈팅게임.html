@@ -197,7 +197,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.3.3</div>
+        <div id="gameVersion">v 2.3.4</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -1426,7 +1426,7 @@
                             }
                         },
                         speacal: function (angle) {
-                            this.isspeacal = 60
+                            this.isspeacal = 45
                         },
                     },
                     strike: {
@@ -1549,7 +1549,7 @@
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
                                 damage: this.damage,
-                                chain: this.chaincount * 3,
+                                chain: this.chaincount * 2.5,
                                 explosive: 'chainSP',
                                 hitEnemies: [],
                                 target: null,
@@ -1834,11 +1834,11 @@
                         name: '강한 샷',
                         basedamage: 200,
                         basespeed: 12,
-                        basecooldown: 1000,
+                        basecooldown: 800,
                         baseexplosiverange: 75,
                         damage: 200,
                         speed: 12,
-                        cooldown: 1000,
+                        cooldown: 800,
                         lastShot: 0,
                         pierce: 1000,
                         explosiverange: 75,
