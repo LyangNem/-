@@ -197,7 +197,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.2.1</div>
+        <div id="gameVersion">v 2.3.1</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -498,7 +498,7 @@
                 },
                 parryBoost: {
                     name: '쿨다운 가속',
-                    description: '방어어의 초당 쿨다운 속도가 0.7초 빨라집니다.',
+                    description: '방어의 초당 쿨다운 속도가 0.7초 빨라집니다.',
                     rarity: 'legendary',
                     apply: function () {
                         game.player.spacecooldownpersecond001 += 7;
@@ -1195,6 +1195,7 @@
                     speacalattack: function () {
                         let now = Date.now();
                         if (this.speacal <= 0) return;
+                        if (game.player.weapon.name === '자동의' && game.player.weapon.isspeacal > 0) return;
 
                         for (let i = 0; i < 10; i++) {
                             if (arr_sound[i].paused) {
@@ -1401,7 +1402,9 @@
                         spread: 0.1,
                         cooldown: 100,
                         lastShot: 0,
+                        radius: 12.5,
                         pierce: 0,
+                        isspeacal: 0,
                         attack: function (angle) {
                             for (let i = 0; i < this.spread; i++) {
                                 let spreadAngle = angle + (Math.random() - 0.5) * 0.1;
@@ -1418,11 +1421,12 @@
                                     initialY: game.player.y,
                                     timeToLive: 100,
                                     pierce: this.pierce,
+                                    isspeacal: this.isspeacal,
                                 });
                             }
                         },
                         speacal: function (angle) {
-                            
+                            this.isspeacal = 60
                         },
                     },
                     strike: {
@@ -1859,7 +1863,22 @@
                             });
                         },
                         speacal: function (angle) {
-                            
+                            game.bullets.push({
+                                x: game.player.x,
+                                y: game.player.y,
+                                radius: 54,
+                                color: game.player.color,
+                                speed: this.speed * 1.5,
+                                dx: Math.cos(angle),
+                                dy: Math.sin(angle),
+                                damage: this.damage,
+                                pierce: this.pierce,
+                                reflections: 0,
+                                maxReflections: this.maxReflections,
+                                reflectionpierce: this.reflectionpierce,
+                                explosive: 'strongshot',
+                                hitEnemies: [],
+                            });
                         },
                     },
                     tripleimpact: {
@@ -2698,6 +2717,16 @@
                             bullet.damage = bullet.damage * (bullet.timeToLive / 100);
                         }
 
+                        if (game.player.weapon.name === '자동의') {
+                            if (bullet.isspeacal > 0) {
+                                bullet.radius = game.player.weapon.radius * 2
+                                bullet.isspeacal = 0
+                                game.player.weapon.isspeacal -= 1
+                                bullet.damage = bullet.damage * 2
+                                bullet.pierce += 3
+                            }
+                        }
+
                         if (bullet.target && !game.enemies.includes(bullet.target)) {
                             bullet.target = null;
                         }
@@ -3303,7 +3332,7 @@
 
             const weaponDescriptions = {
                 multishot: `다중 발사 / MultiShot\n여러 발의 탄환을 동시에 발사합니다.\nDamage ${game.weapons.multishot.damage} × ${game.weapons.multishot.spread}\n\n[ 비범하다! ]\n\n다다중 발사 / SuperMultiShot\n두명의 적을 관통하는 더 강력한 탄환을 3배 더 많이 발사합니다!`,
-                automatic: `자동의 / Automatic\n날아갈수록 점점 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.automatic.damage}`,
+                automatic: `자동의 / Automatic\n날아갈수록 점점 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.automatic.damage}\n\n[ 비범하다! ]\n\n위대한토마틱 / Greatomatic\n몇발의 더 세고 위대한 총알이 세명의 적을 꿰뚫습니다!`,
                 strike: `내려치기 / Strike\n원하는 지점에 강력한 공격을 가합니다.\nDamage ${game.weapons.strike.damage}`,
                 dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 100% × 2`,
                 swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}\n\n[ 비범하다! ]\n\n공포의 휘두르다 / FearSwing\n더 거대한 범위는 총알들이 겁에 질려 도망치게 만들었습니다.`,
@@ -3312,7 +3341,7 @@
                 burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
                 secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
                 cycle: `주기 / Cycle\n주기구체가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage}\n\n[ 비범하다! ]\n\n주기 흡수 / AbsorbCycle\n더 크고 강력한 주기구체가 맹렬히 회전하며 타격 시 체력을 회복합니다!`,
-                strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%`,
+                strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠르고 강한 샷 / FastStrongShot\n아주 빅하고 빠르다!`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
                 
                 shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 5회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
