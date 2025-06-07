@@ -197,7 +197,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.3.2</div>
+        <div id="gameVersion">v 2.3.3</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -1269,10 +1269,10 @@
                 defense: {
                     shield: {
                         name: "방어",
-                        basecooldown: 6000,
-                        cooldown: 6000,
-                        maxcooldown: 6000,
-                        maxUses: 5,
+                        basecooldown: 4500,
+                        cooldown: 4500,
+                        maxcooldown: 4500,
+                        maxUses: 7,
                         currentUses: 0,
                         isActive: false,
                         activate: function () {
@@ -1283,7 +1283,7 @@
                             }
                         },
                         resetshield: function () {
-                            if (this.currentUses < 5) {
+                            if (this.currentUses < 7) {
                                 this.isActive = true;
                                 game.player.invincible = 50;
                                 this.currentUses += 1;
@@ -3344,7 +3344,7 @@
                 strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠른 강한 샷 / FastStrongShot\n아주 빅하고 빠르다!`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
                 
-                shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 5회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
+                shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 7회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
                 dash: `대시 / Dash\n짧은 거리를 이동합니다. 이동 도중에는 무적이 됩니다.\nCool Time ${(game.defense.dash.cooldown / 1000).toFixed(1)}s`,
             };
 
