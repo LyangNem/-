@@ -1928,7 +1928,7 @@
                         basedamage: 40,
                         basespeed: 24,
                         basecooldown: 50,
-                        spread: 0.3,
+                        spread: 0.1,
                         damage: 40,
                         speed: 24,
                         cooldown: 50,
@@ -1936,7 +1936,7 @@
                         maxlifetime: 26,
                         attack: function(angle) {
                             for (let i = 0; i < this.spread; i++) {
-                                let spreadAngle = angle + (Math.random() - 0.5) * 0.1;
+                                let spreadAngle = angle + (Math.random() - 0.5) * 0.05;
                                 game.bullets.push({
                                     x: game.player.x,
                                     y: game.player.y,
