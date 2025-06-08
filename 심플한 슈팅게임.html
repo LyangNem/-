@@ -199,7 +199,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.4.4</div>
+        <div id="gameVersion">v 2.4.5</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -581,6 +581,9 @@
                         } else if (weaponName === 'tripleimpact') {
                             this.name = '충격적인';
                             this.description = '[ 세번 충격 전용 ]\n탄환의 크기가 40% 작아지고 피해량이 18% 증가합니다.';
+                        } else if (weaponName === 'grinder') {
+                            this.name = '광역 가정 교사';
+                            this.description = '[ 가정 교사 전용 ]\n탄환이 적중 시 폭발해 15%의 피해를 입힙니다.';
                         } else {
                             this.name = '전용 강화';
                             this.description = '현재 무기에는 특별한 스킬이 없습니다.';
@@ -630,6 +633,9 @@
                             if (game.weapons.tripleimpact.radius < 1) {
                                 game.weapons.tripleimpact.radius = 1;
                             }
+                        } else if (selectedWeaponName === 'grinder') {
+                            game.weapons.grinder.explosivedamagemultifly += 0.15;
+                            game.weapons.grinder.explosiverange += 40;
                         }
                         collectedItems.push(this);
                     },
@@ -841,6 +847,7 @@
             const keys = {};
             let score = 0;
             let summonSpeed = 120;
+            let pre_rep_time = 0;
 
             const game = {
                 summonSpeed: 120,
@@ -1930,10 +1937,13 @@
                         basecooldown: 50,
                         spread: 0.1,
                         damage: 80,
+                        explosivedamagemultifly: 0,
                         speed: 24,
                         cooldown: 50,
                         lastShot: 0,
                         maxlifetime: 26,
+                        explosiverange: 0,
+                        isspeacal: false,
                         attack: function(angle) {
                             for (let i = 0; i < this.spread; i++) {
                                 let spreadAngle = angle + (Math.random() - 0.5) * 0.05;
@@ -1948,6 +1958,8 @@
                                     damage: this.damage,
                                     lifetime: 0,
                                     maxlifetime: this.maxlifetime,
+                                    explosiverange: this.explosiverange,
+                                    explosive: 'grinder',
                                 });
                             }
                         },
@@ -2738,6 +2750,10 @@
                 },
 
                 updateGame: function () {
+                    rep_time = Date.now();
+                    if(rep_time - pre_rep_time > 15) {
+                    pre_rep_time = rep_time;
+                    
                     game.player.update();
                     if (mouseDown) {
                         game.player.attack();
@@ -2808,6 +2824,8 @@
                                     game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage * 2, game.weapons.strongshot.explosiverange * 2, 'weapon', bullet.explosive);
                                 } else if (bullet.explosive === 'chainSP') {
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.chain.explosiverange, 'weapon', bullet.explosive);
+                                } else if (bullet.explosive === 'grinder') {
+                                    game.handleExplosion(bullet.x, bullet.y, bullet.damage * game.weapons.grinder.explosivedamagemultifly, game.weapons.grinder.explosiverange, 'weapon', bullet.explosive);
                                 }
                             }
                             if(bullet.explosive === 'chainSP') {
@@ -2895,6 +2913,8 @@
                                             game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage * 2, game.weapons.strongshot.explosiverange * 2, 'weapon', bullet.explosive);
                                         } else if (bullet.explosive === 'chainSP') {
                                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.chain.explosiverange, 'weapon', bullet.explosive);
+                                        } else if (bullet.explosive === 'grinder') {
+                                            game.handleExplosion(bullet.x, bullet.y, bullet.damage * game.weapons.grinder.explosivedamagemultifly, game.weapons.grinder.explosiverange, 'weapon', bullet.explosive);
                                         }
                                     }
 
@@ -3187,6 +3207,7 @@
                     if (score % game.summonSpeedDecreaseInterval === 0) {
                         game.updateSummonSpeed();
                     }
+                }
                 },
 
                 drawGame: function () {
