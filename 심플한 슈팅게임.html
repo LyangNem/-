@@ -199,7 +199,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.4.1</div>
+        <div id="gameVersion">v 2.4.3</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -1271,9 +1271,9 @@
                 defense: {
                     shield: {
                         name: "방어",
-                        basecooldown: 4500,
-                        cooldown: 4500,
-                        maxcooldown: 4500,
+                        basecooldown: 2000,
+                        cooldown: 2000,
+                        maxcooldown: 2000,
                         maxUses: 7,
                         currentUses: 0,
                         isActive: false,
@@ -1300,9 +1300,9 @@
                 
                     dash: {
                         name: "대시",
-                        basecooldown: 11000,
-                        cooldown: 11000,
-                        maxcooldown: 11000,
+                        basecooldown: 14000,
+                        cooldown: 14000,
+                        maxcooldown: 14000,
                         isActive: false,
                         dashValue: 3.5,
                         activate: function () {
@@ -1589,12 +1589,12 @@
                             game.bullets.push({
                                 x: game.player.x,
                                 y: game.player.y,
-                                radius: 20,
+                                radius: 18,
                                 color: game.player.color,
                                 speed: this.speed * 1.5,
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
-                                damage: this.damage * 1.6,
+                                damage: this.damage * 2,
                                 pierce: 1000,
                                 absorb: true,
                             });
@@ -1925,11 +1925,11 @@
                     },
                     grinder: {
                         name: "가정 교사",
-                        basedamage: 40,
+                        basedamage: 80,
                         basespeed: 24,
                         basecooldown: 50,
                         spread: 0.1,
-                        damage: 40,
+                        damage: 80,
                         speed: 24,
                         cooldown: 50,
                         lastShot: 0,
@@ -2525,7 +2525,7 @@
                         type: 'assassin',
                         shootCooldown: 0,
                         damage: 15,
-                        spawnRate: 1,
+                        spawnRate: 0.5,
                         scoreValue: 70,
                         bodyStrength: 0.8,
                         borderResis: 0,
