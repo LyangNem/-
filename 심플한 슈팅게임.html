@@ -1274,7 +1274,7 @@
                         basecooldown: 2000,
                         cooldown: 2000,
                         maxcooldown: 2000,
-                        maxUses: 7,
+                        maxUses: 5,
                         currentUses: 0,
                         isActive: false,
                         activate: function () {
@@ -1285,7 +1285,7 @@
                             }
                         },
                         resetshield: function () {
-                            if (this.currentUses < 7) {
+                            if (this.currentUses < 5) {
                                 this.isActive = true;
                                 game.player.invincible = 50;
                                 this.currentUses += 1;
@@ -3394,7 +3394,7 @@
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
                 grinder: `가정 교사 / Grinder\n나약한 자의 말은 듣지 않습니다.\nDamage ${game.weapons.grinder.damage}`,
                 
-                shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 7회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
+                shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 5회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
                 dash: `대시 / Dash\n짧은 거리를 이동합니다. 이동 도중에는 무적이 됩니다.\nCool Time ${(game.defense.dash.cooldown / 1000).toFixed(1)}s`,
             };
 
