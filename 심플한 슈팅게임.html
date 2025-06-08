@@ -172,14 +172,16 @@
                 <button onmouseover="showDescription('strike')" onmouseout="hideDescription()" onclick="selectWeapon('strike')"> 내려치기 </button>
                 <button onmouseover="showDescription('dual')" onmouseout="hideDescription()" onclick="selectWeapon('dual')"> 두개 </button>
                 <button onmouseover="showDescription('swing')" onmouseout="hideDescription()" onclick="selectWeapon('swing')"> 휘두르다 </button>
+                </p><p>
                 <button onmouseover="showDescription('chain')" onmouseout="hideDescription()" onclick="selectWeapon('chain')"> 연쇄 </button>
-            </p><p>
                 <button onmouseover="showDescription('absorb')" onmouseout="hideDescription()" onclick="selectWeapon('absorb')"> 흡수 </button>
                 <button onmouseover="showDescription('burst')" onmouseout="hideDescription()" onclick="selectWeapon('burst')"> 터지는 공격 </button>
                 <button onmouseover="showDescription('secondchance')" onmouseout="hideDescription()" onclick="selectWeapon('secondchance')"> 두번째 기회 </button>
+                </p><p>
                 <button onmouseover="showDescription('cycle')" onmouseout="hideDescription()" onclick="selectWeapon('cycle')"> 주기 </button>
                 <button onmouseover="showDescription('strongshot')" onmouseout="hideDescription()" onclick="selectWeapon('strongshot')"> 강한 샷 </button>
 		        <button onmouseover="showDescription('tripleimpact')" onmouseout="hideDescription()" onclick="selectWeapon('tripleimpact')"> 세번 충격 </button>
+                <button onmouseover="showDescription('grinder')" onmouseout="hideDescription()" onclick="selectWeapon('grinder')"> 가정 교사 </button>
             </p>
         </div>
 
@@ -197,7 +199,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.3.4</div>
+        <div id="gameVersion">v 2.4.1</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -890,7 +892,7 @@
                                 } else if (weapon === 'dual') {
                                     dmg = damage;
                                 } else if (weapon === 'strongshot') {
-                                    dmg = game.weapons.strongshot.damage * 0.5;
+                                    dmg = damage;
                                 } else if (weapon === 'tripleimpact') {
                                     dmg = damage;
                                 } else if (weapon === 'chain') {
@@ -1833,10 +1835,12 @@
                     strongshot: {
                         name: '강한 샷',
                         basedamage: 200,
+                        baseexplosivedamage: 100,
                         basespeed: 12,
                         basecooldown: 800,
                         baseexplosiverange: 75,
                         damage: 200,
+                        explosivedamage: 100,
                         speed: 12,
                         cooldown: 800,
                         lastShot: 0,
@@ -1854,6 +1858,7 @@
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
                                 damage: this.damage,
+                                explosivedamage: this.explosivedamage,
                                 pierce: this.pierce,
                                 reflections: 0,
                                 maxReflections: this.maxReflections,
@@ -1866,17 +1871,18 @@
                             game.bullets.push({
                                 x: game.player.x,
                                 y: game.player.y,
-                                radius: 54,
+                                radius: 18,
                                 color: game.player.color,
                                 speed: this.speed * 1.5,
                                 dx: Math.cos(angle),
                                 dy: Math.sin(angle),
                                 damage: this.damage,
+                                explosivedamage: this.explosivedamage,
                                 pierce: this.pierce,
                                 reflections: 0,
                                 maxReflections: this.maxReflections,
                                 reflectionpierce: this.reflectionpierce,
-                                explosive: 'strongshot',
+                                explosive: 'strongshotSP',
                                 hitEnemies: [],
                             });
                         },
@@ -1912,6 +1918,34 @@
                                 explosive: "tripleimpact",
                             };
                             game.bullets.push(bullet);
+                        },
+                        speacal: function (angle) {
+                                                
+                        },
+                    },
+                    grinder: {
+                        name: "가정 교사",
+                        basedamage: 40,
+                        basespeed: 12,
+                        basecooldown: 50,
+                        damage: 40,
+                        speed: 12,
+                        cooldown: 50,
+                        lastShot: 0,
+                        maxlifetime: 51,
+                        attack: function(angle) {
+                            game.bullets.push({
+                                x: game.player.x,
+                                y: game.player.y,
+                                radius: 10,
+                                color: game.player.color,
+                                speed: this.speed,
+                                dx: Math.cos(angle),
+                                dy: Math.sin(angle),
+                                damage: this.damage,
+                                lifetime: 0,
+                                maxlifetime: this.maxlifetime,
+                            });
                         },
                         speacal: function (angle) {
                                                 
@@ -2758,7 +2792,9 @@
                                 } else if (bullet.explosive === 'dual') {
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.dual.explosiverange, 'weapon', bullet.explosive);
                                 } else if (bullet.explosive === 'strongshot') {
-                                    game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.strongshot.explosiverange, 'weapon', bullet.explosive);
+                                    game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage, game.weapons.strongshot.explosiverange, 'weapon', bullet.explosive);
+                                } else if (bullet.explosive === 'strongshotSP') {
+                                    game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage * 2, game.weapons.strongshot.explosiverange * 2, 'weapon', bullet.explosive);
                                 } else if (bullet.explosive === 'chainSP') {
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.chain.explosiverange, 'weapon', bullet.explosive);
                                 }
@@ -2825,7 +2861,7 @@
                                     if (enemy.health <= 0) {
                                         if (bullet.absorb) {
                                             game.player.health = Math.min(
-                                                game.player.health + game.player.maxHealth * 0.0025,
+                                                game.player.health + game.player.maxHealth * 0.004,
                                                 game.player.maxHealth
                                             );
                                         }
@@ -2843,7 +2879,9 @@
                                         } else if (bullet.explosive === 'dual') {
                                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.dual.explosiverange, 'weapon', bullet.explosive);
                                         } else if (bullet.explosive === 'strongshot') {
-                                            game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.strongshot.explosiverange, 'weapon', bullet.explosive);
+                                            game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage, game.weapons.strongshot.explosiverange, 'weapon', bullet.explosive);
+                                        } else if (bullet.explosive === 'strongshotSP') {
+                                            game.handleExplosion(bullet.x, bullet.y, bullet.explosivedamage * 2, game.weapons.strongshot.explosiverange * 2, 'weapon', bullet.explosive);
                                         } else if (bullet.explosive === 'chainSP') {
                                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.chain.explosiverange, 'weapon', bullet.explosive);
                                         }
@@ -3336,13 +3374,14 @@
                 strike: `내려치기 / Strike\n원하는 지점에 강력한 공격을 가합니다.\nDamage ${game.weapons.strike.damage}`,
                 dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 100% × 2`,
                 swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}\n\n[ 비범하다! ]\n\n공포의 휘두르다 / FearSwing\n더 거대한 범위는 총알들이 겁에 질려 도망치게 만들었습니다.`,
-                chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 25% 강해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}\n\n[ 비범하다! ]\n\n충격파 연쇄 / ChainOfShockwave\n더 빠르고 커다란 탄환이 3배 더 많은 적에게 연쇄폭발하며, 벽 따위에게 패배하지 않습니다!`,
-                absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적 처치 시 최대체력의 0.25%를 회복합니다.\nDamage ${game.weapons.absorb.damage}\n\n[ 비범하다! ]\n\n최고의 흡수! / GreatOfAbsorb\n적을 완벽하게 관통하는 더 크고, 강하고, 빠른 탄환을 발사합니다!`,
+                chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 25% 강해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}\n\n[ 비범하다! ]\n\n충격파 연쇄 / ChainOfShockwave\n더 빠르고 커다란 탄환이 2.5배 더 많은 적에게 연쇄폭발하며, 벽 따위에게 패배하지 않습니다!`,
+                absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적 처치 시 최대체력의 0.4%를 회복합니다.\nDamage ${game.weapons.absorb.damage}\n\n[ 비범하다! ]\n\n최고의 흡수! / GreatOfAbsorb\n적을 완벽하게 관통하는 더 크고, 강하고, 빠른 탄환을 발사합니다!`,
                 burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
                 secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
                 cycle: `주기 / Cycle\n주기구체가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage}\n\n[ 비범하다! ]\n\n주기 흡수 / AbsorbCycle\n더 크고 강력한 주기구체가 맹렬히 회전하며 타격 시 체력을 회복합니다!`,
-                strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠른 강한 샷 / FastStrongShot\n아주 빅하고 빠르다!`,
+                strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중 시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠른 강한 샷 / FastStrongShot\n아주 빠르고 크게 터지다!`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
+                grinder: `가정 교사 / Grinder\n나약한 자의 말은 듣지 않습니다.\nDamage ${game.weapons.grinder.damage}`,
                 
                 shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 7회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
                 dash: `대시 / Dash\n짧은 거리를 이동합니다. 이동 도중에는 무적이 됩니다.\nCool Time ${(game.defense.dash.cooldown / 1000).toFixed(1)}s`,
@@ -3380,7 +3419,12 @@
             canvas.addEventListener('mousedown', function (e) {
                 if (e.button === 0) {
                     mouseDown = true;
-                    game.player.attack();
+                    if(game.player.weapon.name === '가정 교사') {
+                        mouseDown = false;
+                    }
+                    if(!gamePaused === true) {
+                        game.player.attack();
+                    }
                 } else if (e.button === 2) {
                     game.player.speacalattack();
                 }
