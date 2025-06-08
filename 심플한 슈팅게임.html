@@ -1926,26 +1926,30 @@
                     grinder: {
                         name: "가정 교사",
                         basedamage: 40,
-                        basespeed: 12,
+                        basespeed: 24,
                         basecooldown: 50,
+                        spread: 0.3,
                         damage: 40,
-                        speed: 12,
+                        speed: 24,
                         cooldown: 50,
                         lastShot: 0,
-                        maxlifetime: 51,
+                        maxlifetime: 31,
                         attack: function(angle) {
-                            game.bullets.push({
-                                x: game.player.x,
-                                y: game.player.y,
-                                radius: 10,
-                                color: game.player.color,
-                                speed: this.speed,
-                                dx: Math.cos(angle),
-                                dy: Math.sin(angle),
-                                damage: this.damage,
-                                lifetime: 0,
-                                maxlifetime: this.maxlifetime,
-                            });
+                            for (let i = 0; i < this.spread; i++) {
+                                let spreadAngle = angle + (Math.random() - 0.5) * 0.1;
+                                game.bullets.push({
+                                    x: game.player.x,
+                                    y: game.player.y,
+                                    radius: 14,
+                                    color: game.player.color,
+                                    speed: this.speed,
+                                    dx: Math.cos(spreadAngle),
+                                    dy: Math.sin(spreadAngle),
+                                    damage: this.damage,
+                                    lifetime: 0,
+                                    maxlifetime: this.maxlifetime,
+                                });
+                            }
                         },
                         speacal: function (angle) {
                                                 
@@ -2771,6 +2775,13 @@
                             const angle = Math.atan2(dy, dx);
                             bullet.dx = Math.cos(angle);
                             bullet.dy = Math.sin(angle);
+                        }
+
+                        if (game.player.weapon.name === '가정 교사') {
+                            bullet.lifetime++;
+                            if (bullet.lifetime == bullet.maxlifetime) {
+                            game.bullets.splice(index, 1);
+                            }
                         }
 
                         if (game.player.weapon.name === '세번 충격') {
