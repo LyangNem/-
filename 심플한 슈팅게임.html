@@ -200,7 +200,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.5.2</div>
+        <div id="gameVersion">v 2.5.3</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -816,9 +816,9 @@
                     tank: '체력이 많은 큰 적',
                     sniper: '움직이지 않는 적',
                     buffer: '주변의 적에게 이동속도 증가를 주는 적',
-                    debuffer: '느리게 만드는 적적',
+                    debuffer: '느리게 만드는 적',
                     explosive: '한방에 죽지만 빠른 자폭하는 적',
-                    assassin: '가까이 가면 부담스럽게 들이대는 적적',
+                    assassin: '가까이 가면 부담스럽게 들이대는 적',
                     splitter: '죽으면 작게 분열하는 체력이 아주 많은 적',
                     charger: '같은 차징 적끼리 탄환을 주고 받으며 공격력을 키우는 적',
                 };
@@ -1411,12 +1411,12 @@
                 weapons: {
                     multishot: {
                         name: '다중 발사',
-                        basedamage: 40,
+                        basedamage: 60,
                         basespeed: 10,
                         basecooldown: 500,
-                        damage: 40,
+                        damage: 60,
                         speed: 10,
-                        spread: 6,
+                        spread: 8,
                         cooldown: 500,
                         lastShot: 0,
                         dualSpreadCount: 0,
@@ -1440,7 +1440,7 @@
                                 game.bullets.push({
                                     x: game.player.x,
                                     y: game.player.y,
-                                    radius: 5,
+                                    radius: 7.5,
                                     color: game.player.color,
                                     speed: this.speed,
                                     dx: Math.cos(spreadAngle),
@@ -1475,7 +1475,7 @@
                                 game.bullets.push({
                                     x: game.player.x,
                                     y: game.player.y,
-                                    radius: 7.5,
+                                    radius: 10,
                                     color: game.player.color,
                                     speed: this.speed * 2,
                                     dx: Math.cos(spreadAngle),
