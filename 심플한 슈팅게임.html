@@ -200,7 +200,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.5.1</div>
+        <div id="gameVersion">v 2.5.2</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -1246,6 +1246,9 @@
                             } else {
                                 return;
                             }
+                        } else if (game.player.weapon.name === '주기' && game.player.weapon.isspeacal == true) {
+                                console.log('취소됨');
+                                return;
                         } else if (this.weapon.lastShot + this.weapon.cooldown > now) {
                             return;
                         }
@@ -1314,6 +1317,7 @@
                         }
 
                         this.speacal -= 1
+                        this.weapon.lastShot = now;
                     },
 
                     draw: function () {
@@ -3577,6 +3581,8 @@
                     mouseDown = true;
                     if(game.player.weapon.name === '가정 교사') {
                         mouseDown = false;
+                    } else if(game.player.weapon.name === '주기' && game.player.weapon.isspeacal == true) {
+                        return;
                     }
                     if(!gamePaused === true) {
                         game.player.attack();
