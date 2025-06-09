@@ -182,6 +182,7 @@
                 <button onmouseover="showDescription('strongshot')" onmouseout="hideDescription()" onclick="selectWeapon('strongshot')"> 강한 샷 </button>
 		        <button onmouseover="showDescription('tripleimpact')" onmouseout="hideDescription()" onclick="selectWeapon('tripleimpact')"> 세번 충격 </button>
                 <button onmouseover="showDescription('grinder')" onmouseout="hideDescription()" onclick="selectWeapon('grinder')"> 가정 교사 </button>
+                <button onmouseover="showDescription('slashandblow')" onmouseout="hideDescription()" onclick="selectWeapon('slashandblow')"> 베고 일격 </button>
             </p>
         </div>
 
@@ -199,7 +200,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.4.5</div>
+        <div id="gameVersion">v 2.5.0</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -293,6 +294,8 @@
                     const explodedamagenow = Math.round(game.player.weapon.damage * 150) / 100;
                     const explodedamagenow2 = Math.round(game.player.weapon.damage * 200) / 100;
                     playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow} | 폭발 피해량 : ${damagenow}/${explodedamagenow}/${explodedamagenow2} | 비범함 : ${game.player.speacal}/${game.player.maxspeacal}`;
+                } else if (game.player.weapon.name === '베고 일격') {
+                    playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 베기 피해량 : ${damagenow} | 일격 피해량 : ${(damagenow * game.player.weapon.blowdamagemultifly)} | 비범함 : ${game.player.speacal}/${game.player.maxspeacal}`;
                 } else { 
                     playerHealthDiv.innerText = `체력 : ${game.player.health}/${game.player.maxHealth} | 피해량 : ${damagenow} | 비범함 : ${game.player.speacal}/${game.player.maxspeacal}`;
                 }
@@ -464,8 +467,12 @@
                     rarity: 'epic',
                     apply: function () {
                         game.player.weapon.cooldown -= game.player.weapon.basecooldown * 0.1;
+                        game.player.weapon.blowcooldown -= game.player.weapon.baseblowcooldown * 0.1;
                         if (game.player.weapon.cooldown < 1) {
                             game.player.weapon.cooldown = 1;
+                        }
+                        if (game.player.weapon.blowcooldown < 1) {
+                            game.player.weapon.blowcooldown = 1;
                         }
                         collectedItems.push(this);
                     },
@@ -920,28 +927,65 @@
                     const bulletAngle = Math.atan2(dy, dx);
                     const laserDX = Math.cos(bulletAngle);
                     const laserDY = Math.sin(bulletAngle);
-
-                    game.lasers.push({
-                        x: bulletX,
-                        y: bulletY,
-                        dx: laserDX,
-                        dy: laserDY,
-                        angle: bulletAngle,
-                        damage: damage,
-                        duration: 15,
-                        hitEnemies: Array.isArray(hitEnemies) ? hitEnemies : [],
-                        width: game.weapons.secondchance.laserthickness,
-                    });
+                    if (game.player.weapon.name === '두번째 기회') {
+                        game.lasers.push({
+                            x: bulletX,
+                            y: bulletY,
+                            dx: laserDX,
+                            dy: laserDY,
+                            angle: bulletAngle,
+                            damage: damage,
+                            duration: 15,
+                            hitEnemies: Array.isArray(hitEnemies) ? hitEnemies : [],
+                            width: game.weapons.secondchance.laserthickness,
+                        });
+                    } else if (game.player.weapon.name === '베고 일격') {
+                        game.lasers.push({
+                            x: bulletX,
+                            y: bulletY,
+                            dx: laserDX * 0.1,
+                            dy: laserDY * 0.1,
+                            angle: bulletAngle,
+                            damage: damage,
+                            duration: 5,
+                            hitEnemies: Array.isArray(hitEnemies) ? hitEnemies : [],
+                            width: game.weapons.slashandblow.slashthickness,
+                        });
+                    }
                 },
 
                 drawLaser: function (laser) {
-                    ctx.beginPath();
-                    ctx.moveTo(laser.x, laser.y);
-                    ctx.lineTo(laser.x + laser.dx * 2000, laser.y + laser.dy * 2000);
-                    ctx.strokeStyle = game.player.color;
-                    ctx.lineWidth = laser.width; // 레이저 두께
-                    ctx.stroke();
-                    ctx.closePath();
+                    if (game.player.weapon.name === '두번째 기회') {
+                        ctx.beginPath();
+                        ctx.moveTo(laser.x, laser.y);
+                        ctx.lineTo(laser.x + laser.dx * 2000, laser.y + laser.dy * 2000);
+                        ctx.strokeStyle = game.player.color;
+                        ctx.lineWidth = laser.width; // 레이저 두께
+                        ctx.stroke();
+                        ctx.closePath();
+
+                        ctx.beginPath();
+                        ctx.arc(laser.x, laser.y, laser.width * 0.5, 0, Math.PI * 2);
+                        ctx.fillStyle = game.player.color;
+                        ctx.fill();
+                        ctx.closePath();
+                    } else if (game.player.weapon.name === '베고 일격') {
+                        ctx.beginPath();
+                        ctx.moveTo(laser.x, laser.y);
+                        ctx.lineTo(laser.x + laser.dx * 2000, laser.y + laser.dy * 2000);
+                        ctx.strokeStyle = game.player.color;
+                        ctx.lineWidth = laser.width; // 레이저 두께
+                        ctx.stroke();
+
+                        ctx.arc(laser.x, laser.y, laser.width * 0.5, 0, Math.PI * 2);
+                        ctx.fillStyle = game.player.color;
+                        ctx.fill();
+
+                        ctx.arc(laser.x + laser.dx * 2000, laser.y + laser.dy * 2000, laser.width * 0.5, 0, Math.PI * 2);
+                        ctx.fillStyle = game.player.color;
+                        ctx.fill();
+                        ctx.closePath();
+                    }
                 },
 
                 handleSwordEffectCollision: function (effect) {
@@ -985,7 +1029,11 @@
                     }
                     game.enemies.forEach((enemy, index) => {
                         if (game.utils.circleCollision(effect, enemy)) {
-                            enemy.health -= game.player.weapon.damage;
+                            if (game.player.weapon.name === '베고 일격') {
+                                enemy.health -= game.player.weapon.damage * game.player.weapon.blowdamagemultifly;
+                            } else {
+                                enemy.health -= game.player.weapon.damage;
+                            }
                             if (enemy.health <= 0) {
                                 enemy.handleDeath(index);
                             } else {
@@ -1170,7 +1218,19 @@
 
                     attack: function () {
                         let now = Date.now();
-                        if (this.weapon.lastShot + this.weapon.cooldown > now) return;
+                        let blownow = Date.now();
+                        if (this.weapon.lastShot + this.weapon.cooldown > now && game.player.weapon.name === '베고 일격') {
+                            if (this.weapon.blowlastShot + this.weapon.blowcooldown < blownow) {
+                                game.effects.createSwordEffect(this.x, this.y, game.weapons.slashandblow.blowrange);
+                                game.handleSwordEffectDamage(this.x, this.y, game.weapons.slashandblow.blowrange, true);
+                                this.weapon.blowlastShot = blownow;
+                                return;
+                            } else {
+                                return;
+                            }
+                        } else if (this.weapon.lastShot + this.weapon.cooldown > now) {
+                            return;
+                        }
 
                         for (let i = 0; i < 10; i++) {
                             if (arr_sound[i].paused) {
@@ -1198,6 +1258,9 @@
                             this.weapon.attack(angle);
                         }
 
+                        if (this.weapon.name === '베고 일격') {
+                            this.weapon.blowlastShot = blownow;
+                        }
                         this.weapon.lastShot = now;
                     },
 
@@ -1967,6 +2030,48 @@
                                                 
                         },
                     },
+                    slashandblow: {
+                        name: "베고 일격",
+                        basedamage: 150,
+                        baseblowrange: 125,
+                        baseslashthickness: 120,
+                        basecooldown: 1200,
+                        baseblowcooldown: 300,
+                        damage: 150,
+                        blowdamagemultifly: 0.6,
+                        blowrange: 125,
+                        slashthickness: 120,
+                        cooldown: 1200,
+                        blowcooldown: 300,
+                        lastShot: 0,
+                        blowlastShot: 0,
+                        attack: function(angle) {
+                            game.handleLaser(
+                                game.player.x,
+                                game.player.y,
+                                Math.cos(angle),
+                                Math.sin(angle),
+                                game.weapons.slashandblow.damage,
+                                0
+                            );
+                            game.player.x += Math.cos(angle) * 200;
+                            game.player.y += Math.sin(angle) * 200;
+                            let sparedistance = 2;
+                            if(game.player.x < game.player.radius) {
+                                game.player.x = game.player.radius + sparedistance;
+                            } else if(canvas.width - game.player.x < game.player.radius) {
+                                game.player.x = canvas.width - game.player.radius - sparedistance;
+                            } if(game.player.y < game.player.radius) {
+                                game.player.y = game.player.radius + sparedistance;
+                            } else if(canvas.height - game.player.y < game.player.radius) {
+                                game.player.y = canvas.height - game.player.radius - sparedistance;
+                            }
+                            game.player.invincible += 5;
+                        },
+                        speacal: function (angle) {
+                            
+                        },
+                    }
                 },
 
                 enemies: [],
@@ -2546,11 +2651,11 @@
                             let dy = game.player.y - enemy.y;
                             let dist = Math.sqrt(dx * dx + dy * dy);
 
-                            if (dist < 200) {
+                            if (dist < 175) {
                                 enemy.x += (dx / dist) * enemy.speed * 5;
                                 enemy.y += (dy / dist) * enemy.speed * 5;
                                 if (game.utils.circleCollision(game.player, enemy)) {
-                                    if (!game.player.isParrying && !game.player.isDashing) {
+                                    if (!game.player.invincible > 0) {
                                         game.player.health -= enemy.damage;
                                         game.player.color = 'white';
                                         game.player.hitDuration = 10;
@@ -3414,6 +3519,7 @@
                 strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중 시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠른 강한 샷 / FastStrongShot\n아주 빠르고 크게 터지다!`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
                 grinder: `가정 교사 / Grinder\n나약한 자의 말은 듣지 않습니다.\nDamage ${game.weapons.grinder.damage}`,
+                slashandblow: `베고 일격 / SlashNBlow\n돌진하며 경로에 강력한 공격을 가하고, 이후엔 주변을 공격합니다.\nSlash Damage ${game.weapons.slashandblow.damage} / Blow Damage ${(game.weapons.slashandblow.damage * game.weapons.slashandblow.blowdamagemultifly)}`,
                 
                 shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 5회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
                 dash: `대시 / Dash\n짧은 거리를 이동합니다. 이동 도중에는 무적이 됩니다.\nCool Time ${(game.defense.dash.cooldown / 1000).toFixed(1)}s`,
