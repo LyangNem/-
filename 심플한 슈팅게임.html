@@ -1234,6 +1234,11 @@
                         let blownow = Date.now();
                         if (this.weapon.lastShot + this.weapon.cooldown > now && game.player.weapon.name === '베고 일격') {
                             if (this.weapon.blowlastShot + this.weapon.blowcooldown < blownow) {
+                                if (this.has_monstrance >= 1) {
+                                    game.effects.createSwordEffect(this.x, this.y, 130);
+                                    game.handleSwordEffectDamageOfMonstrance(this.x, this.y, 130);
+                                }
+
                                 game.effects.createSwordEffect(this.x, this.y, game.weapons.slashandblow.blowrange);
                                 game.handleSwordEffectDamage(this.x, this.y, game.weapons.slashandblow.blowrange, true);
                                 this.weapon.blowlastShot = blownow;
@@ -3225,7 +3230,7 @@
                                         bullet.dy = Math.sin(angle);
                                     }
 
-                                    bullet.radius += 2.5;
+                                    bullet.radius += 1.25;
                                     bullet.damage += game.enemyTypes.charger.damage;
                                 }
                             }
