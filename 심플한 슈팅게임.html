@@ -810,8 +810,21 @@
                     charger: '차징 적',
                 };
 
+                const enemyInfo = {
+                    basic: '가장 기본적인 적',
+                    fast: '체력이 낮고 빠른 적',
+                    tank: '체력이 많은 큰 적',
+                    sniper: '움직이지 않는 적',
+                    buffer: '주변의 적에게 이동속도 증가를 주는 적',
+                    debuffer: '느리게 만드는 적적',
+                    explosive: '한방에 죽지만 빠른 자폭하는 적',
+                    assassin: '가까이 가면 부담스럽게 들이대는 적적',
+                    splitter: '죽으면 작게 분열하는 체력이 아주 많은 적',
+                    charger: '같은 차징 적끼리 탄환을 주고 받으며 공격력을 키우는 적',
+                };
+
                 enemyPreview.innerHTML = `
-        <h2>다음 스테이지의 적 : ${enemyNamesInKorean[nextEnemyType]}</h2>
+        <h2><p>다음 스테이지의 적 : ${enemyNamesInKorean[nextEnemyType]}</p><p>${enemyInfo[nextEnemyType]}</p></h2>
         <div style="display:inline-block; width:50px; height:50px; background-color:${enemy.color}; border-radius:50%;"></div>
     `;
             }
