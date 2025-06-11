@@ -551,8 +551,7 @@
                     update: function (weaponName) {
                         if (weaponName === 'multishot') {
                             this.name = '자동조준';
-                            this.description =
-                                '[ 다중 발사 전용 ]\n가장 가까운 적을 향해 총알을 50% 추가로 발사합니다.';
+                            this.description = '[ 다중 발사 전용 ]\n가장 가까운 적을 향해 총알을 50% 추가로 발사합니다.';
                         } else if (weaponName === 'automatic') {
                             this.name = '피어스';
                             this.description = '[ 자동의 전용 ]\n탄환이 한명의 적을 관통합니다.';
@@ -576,15 +575,13 @@
                             this.description = '[ 터지는 공격 전용 ]\n탄속과 공격 범위, 피해량이 25% 증가합니다.';
                         } else if (weaponName === 'secondchance') {
                             this.name = '파괴광선';
-                            this.description =
-                                '[ 두번째 기회 전용 ]\n레이저의 크기가 35%, 레이저 피해량이 15% 증가합니다.';
+                            this.description = '[ 두번째 기회 전용 ]\n레이저의 크기가 35%, 레이저 피해량이 15% 증가합니다.';
                         } else if (weaponName === 'cycle') {
                             this.name = '주기 감소';
                             this.description = '[ 주기 전용 ]\n주기구체가 1개 증 가합니다.';
                         } else if (weaponName === 'strongshot') {
                             this.name = '튕긴 샷';
-                            this.description =
-                                '[ 강한 샷 전용 ]\n탄환이 벽에 부딪히면 최대 한명의 적을 관통할 수 있는 상태로 반사됩니다.';
+                            this.description = '[ 강한 샷 전용 ]\n탄환이 벽에 부딪히면 최대 한명의 적을 관통할 수 있는 상태로 반사됩니다.';
                         } else if (weaponName === 'tripleimpact') {
                             this.name = '충격적인';
                             this.description = '[ 세번 충격 전용 ]\n탄환의 크기가 40% 작아지고 피해량이 18% 증가합니다.';
@@ -1205,7 +1202,7 @@
                         }
 
                         // 디버프 상태 해제
-                        if (this.invincible > 0) {
+                        if (this.invincible > 5) {
                             this.isDebuffed = false;
                             this.debuffColor = null;
                             this.speed = this.defaultSpeed;
@@ -1307,8 +1304,8 @@
                         }
 
                         if (this.weapon.name === '내려치기') {
-                            game.effects.createSwordEffect(mouseX, mouseY, game.weapons.strike.range);
-                            game.handleSwordEffectDamage(mouseX, mouseY, game.weapons.strike.range, true);
+                            game.effects.createSwordEffect(mouseX, mouseY, game.weapons.strike.range * game.player.weapon.speacalrangemultifly);
+                            game.handleSwordEffectDamage(mouseX, mouseY, game.weapons.strike.range * game.player.weapon.speacalrangemultifly, true);
                         } else if (this.weapon.name === '휘두르다') {
                             game.effects.createSwordEffect(this.x, this.y, game.weapons.swing.range * 1.5);
                             game.handleSwordEffectDamage(this.x, this.y, game.weapons.swing.range * 1.5, true);
@@ -1535,6 +1532,11 @@
                         cooldown: 400,
                         lastShot: 0,
                         range: 60,
+			speacalrangemultifly: 1.25,
+			fielddamagemultifly: 0.25,
+			fieldduration: 10000,
+			fielddamagecycle: 500,
+			fieldrangemultifly: 2.5,
                         attack: function (angle) {
                             // 내려치기는 탄환이 없음
                         },
@@ -2972,6 +2974,30 @@
                                         bullet.dy *= -1;
                                 }
                             } else if(bullet.explosive === 'strongshot' && bullet.reflections < bullet.maxReflections) {
+                                if (bullet.x - bullet.radius < 0) {
+                                        bullet.x = bullet.radius + 1;
+                                        bullet.dx *= -1; // X축 반사
+                                        bullet.reflections += 1;
+			                            bullet.pierce = bullet.reflectionpierce;
+                                } else if (bullet.x + bullet.radius > canvas.width) {
+                                        bullet.x = canvas.width - bullet.radius -1;
+                                        bullet.dx *= -1;
+                                        bullet.reflections += 1;
+			                            bullet.pierce = bullet.reflectionpierce;
+                                }                               
+
+                                if (bullet.y - bullet.radius < 0) {
+                                        bullet.y = bullet.radius + 1;
+                                        bullet.dy *= -1; // Y축 반사
+                                        bullet.reflections += 1;
+			                            bullet.pierce = bullet.reflectionpierce;
+                                } else if (bullet.y + bullet.radius > canvas.height) {
+                                        bullet.y = canvas.height - bullet.radius - 1;
+                                        bullet.dy *= -1;
+                                        bullet.reflections += 1;
+			                            bullet.pierce = bullet.reflectionpierce;
+                                }
+                            } else if(bullet.explosive === 'strongshotSP' && bullet.reflections < bullet.maxReflections) {
                                 if (bullet.x - bullet.radius < 0) {
                                         bullet.x = bullet.radius + 1;
                                         bullet.dx *= -1; // X축 반사
