@@ -200,7 +200,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.5.3</div>
+        <div id="gameVersion">v 2.9.2</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -575,7 +575,7 @@
                             this.description = '[ 터지는 공격 전용 ]\n탄속과 공격 범위, 피해량이 25% 증가합니다.';
                         } else if (weaponName === 'secondchance') {
                             this.name = '파괴광선';
-                            this.description = '[ 두번째 기회 전용 ]\n레이저의 크기가 35%, 레이저 피해량이 15% 증가합니다.';
+                            this.description = '[ 두번째 기회 전용 ]\n레이저 범위가 35%, 레이저 피해량이 15% 증가합니다.';
                         } else if (weaponName === 'cycle') {
                             this.name = '주기 감소';
                             this.description = '[ 주기 전용 ]\n주기구체가 1개 증 가합니다.';
@@ -588,6 +588,9 @@
                         } else if (weaponName === 'grinder') {
                             this.name = '광역 가정 교사';
                             this.description = '[ 가정 교사 전용 ]\n탄환이 적중 시 폭발해 15%의 피해를 입힙니다.';
+                        } else if (weaponName === 'slashandblow') {
+                            this.name = '크게 벤';
+                            this.description = '[ 베고 일격 전용 ]\n베기 공격 범위가 40% 증가합니다.';
                         } else {
                             this.name = '전용 강화';
                             this.description = '현재 무기에는 특별한 스킬이 없습니다.';
@@ -640,6 +643,8 @@
                         } else if (selectedWeaponName === 'grinder') {
                             game.weapons.grinder.explosivedamagemultifly += 0.15;
                             game.weapons.grinder.explosiverange += 40;
+                        } else if (selectedWeaponName === 'slashandblow') {
+                            game.weapons.slashandblow.slashthickness += game.weapons.slashandblow.baseslashthickness * 0.4;
                         }
                         collectedItems.push(this);
                     },
@@ -1001,14 +1006,14 @@
                 handleSwordEffectCollision: function (effect) {
                     game.enemies.forEach((enemy, index) => {
                         // 충돌 검사
-                        if (game.utils.circleCollision(effect, enemy)) {
-                            enemy.health -= game.player.weapon.damage;
-                            if (enemy.health <= 0) {
-                                enemy.handleDeath(index);
-                            } else {
-                                enemy.healthBarVisible = true;
+                            if (game.utils.circleCollision(effect, enemy)) {
+                                enemy.health -= game.player.weapon.damage;
+                                if (enemy.health <= 0) {
+                                    enemy.handleDeath(index);
+                                } else {
+                                    enemy.healthBarVisible = true;
+                                }
                             }
-                        }
                     });
                 },
                 handleSwordEffectDamage: function (x, y, radius, isspeacal) {
@@ -1229,7 +1234,14 @@
                     attack: function () {
                         let now = Date.now();
                         let blownow = Date.now();
-                        if (this.weapon.lastShot + this.weapon.cooldown > now && game.player.weapon.name === '베고 일격') {
+                        
+                        // 두개 무기 과부하 시 쿨다운 절반
+                        let effectiveCooldown = this.weapon.cooldown;
+                        if (this.weapon.name === '두개' && this.weapon.isOverloaded) {
+                            effectiveCooldown = this.weapon.cooldown / 2;
+                        }
+                        
+                        if (this.weapon.lastShot + effectiveCooldown > now && game.player.weapon.name === '베고 일격') {
                             if (this.weapon.blowlastShot + this.weapon.blowcooldown < blownow) {
                                 if (this.has_monstrance >= 1) {
                                     game.effects.createSwordEffect(this.x, this.y, 130);
@@ -1246,7 +1258,7 @@
                         } else if (game.player.weapon.name === '주기' && game.player.weapon.isspeacal == true) {
                                 console.log('취소됨');
                                 return;
-                        } else if (this.weapon.lastShot + this.weapon.cooldown > now) {
+                        } else if (this.weapon.lastShot + effectiveCooldown > now) {
                             return;
                         }
 
@@ -1286,6 +1298,8 @@
                         let now = Date.now();
                         if (this.speacal <= 0) return;
                         if (game.player.weapon.name === '자동의' && game.player.weapon.isspeacal > 0) return;
+                        if (game.player.weapon.name === '두개' && game.player.weapon.isOverloaded) return;
+                        if (game.player.weapon.name === '가정 교사' && game.player.weapon.isspeacal) return;
 
                         for (let i = 0; i < 10; i++) {
                             if (arr_sound[i].paused) {
@@ -1559,6 +1573,9 @@
                         baseBulletSpacing: 30,
                         baseBulletRadius: 15,
                         explosiverange: 40,
+                        isOverloaded: false,
+                        overloadDuration: 0,
+                        overloadMaxDuration: 480,
                         attack: function (angle) {
                             const anglePerpendicular = angle + Math.PI / 2;
                             const spacingFactor = 1.5 / this.bullets;
@@ -1584,7 +1601,9 @@
                             }
                         },
                         speacal: function (angle) {
-                            
+                            this.isOverloaded = true;
+                            this.overloadDuration = this.overloadMaxDuration;
+                            this.attack(angle);
                         },
                     },
                     swing: {
@@ -1702,7 +1721,7 @@
                         baseexplosiverange: 150,
                         damage: 350,
                         speed: 10,
-                        cooldown: 1000,
+                        cooldown: 700,
                         lastShot: 0,
                         explosiverange: 150,
                         attack: function (angle) {
@@ -1719,7 +1738,17 @@
                             });
                         },
                         speacal: function (angle) {
-                            
+                            game.bullets.push({
+                                x: game.player.x,
+                                y: game.player.y,
+                                radius: 22,
+                                color: game.player.color,
+                                speed: this.speed,
+                                dx: Math.cos(angle),
+                                dy: Math.sin(angle),
+                                damage: this.damage,
+                                explosive: 'burstSP',
+                            });
                         },
                     },
                     secondchance: {
@@ -1750,7 +1779,19 @@
                             });
                         },
                         speacal: function (angle) {
-                            
+                            game.bullets.push({
+                                x: game.player.x,
+                                y: game.player.y,
+                                radius: 18,
+                                color: game.player.color,
+                                speed: this.speed * 1.5,
+                                dx: Math.cos(angle),
+                                dy: Math.sin(angle),
+                                damage: this.damage * 1.5,
+                                hitEnemies: [],
+                                secondchance: true,
+                                secondchanceSP: true,
+                            });
                         },
                     },
                     cycle: {
@@ -2022,6 +2063,7 @@
                         basedamage: 80,
                         basespeed: 24,
                         basecooldown: 50,
+                        basespread: 0.1,
                         spread: 0.1,
                         damage: 80,
                         explosivedamagemultifly: 0,
@@ -2031,9 +2073,14 @@
                         maxlifetime: 26,
                         explosiverange: 0,
                         isspeacal: false,
+                        speacalDuration: 0,
+                        speacalMaxDuration: 600,
                         attack: function(angle) {
-                            for (let i = 0; i < this.spread; i++) {
-                                let spreadAngle = angle + (Math.random() - 0.5) * 0.05;
+                            let bulletCount = this.isspeacal ? 3 : 1;
+                            let spreadAmount = this.isspeacal ? 0.8 : 0.05;
+
+                            for (let i = 0; i < bulletCount; i++) {
+                                let spreadAngle = angle + (Math.random() - 0.5) * spreadAmount;
                                 game.bullets.push({
                                     x: game.player.x,
                                     y: game.player.y,
@@ -2051,7 +2098,9 @@
                             }
                         },
                         speacal: function (angle) {
-                                                
+                            this.isspeacal = true;
+                            this.speacalDuration = this.speacalMaxDuration;
+                            this.attack(angle);
                         },
                     },
                     slashandblow: {
@@ -2892,6 +2941,28 @@
                         game.weapons.cycle.setup();
                     }
 
+                    if (game.player.weapon && game.player.weapon.name === '두개') {
+                        if (game.player.weapon.isOverloaded) {
+                            game.player.weapon.overloadDuration--;
+                            
+                            if (game.player.weapon.overloadDuration <= 0) {
+                                game.player.weapon.isOverloaded = false;
+                                game.player.weapon.overloadDuration = 0;
+                            }
+                        }
+                    }
+                    
+                    if (game.player.weapon && game.player.weapon.name === '가정 교사') {
+                        if (game.player.weapon.isspeacal) {
+                            game.player.weapon.speacalDuration--;
+
+                            if (game.player.weapon.speacalDuration <= 0) {
+                                game.player.weapon.isspeacal = false;
+                                game.player.weapon.speacalDuration = 0;
+                            }
+                        }
+                    }
+                    
                     game.bullets.forEach((bullet, index) => {
                         bullet.x += bullet.dx * bullet.speed * gameSpeed;
                         bullet.y += bullet.dy * bullet.speed * gameSpeed;
@@ -2945,6 +3016,8 @@
                             if (bullet.explosive) {
                                 if (bullet.explosive === 'burst') {
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.burst.explosiverange, 'weapon', bullet.explosive);
+                                } else if (bullet.explosive === 'burstSP') {
+                                    game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.burst.explosiverange * 2, 'weapon', bullet.explosive);
                                 } else if (bullet.explosive === 'dual') {
                                     game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.dual.explosiverange, 'weapon', bullet.explosive);
                                 } else if (bullet.explosive === 'strongshot') {
@@ -3058,6 +3131,8 @@
                                     if (bullet.explosive) {
                                         if (bullet.explosive === 'burst') {
                                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.burst.explosiverange, 'weapon', bullet.explosive);
+                                        } else if (bullet.explosive === 'burstSP') {
+                                            game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.burst.explosiverange * 2, 'weapon', bullet.explosive);
                                         } else if (bullet.explosive === 'dual') {
                                             game.handleExplosion(bullet.x, bullet.y, bullet.damage, game.weapons.dual.explosiverange, 'weapon', bullet.explosive);
                                         } else if (bullet.explosive === 'strongshot') {
@@ -3167,14 +3242,29 @@
                                     }
 
                                     if (bullet.secondchance) {
-                                        game.handleLaser(
-                                            bullet.x,
-                                            bullet.y,
-                                            bullet.dx,
-                                            bullet.dy,
-                                            game.weapons.secondchance.laserdamage,
-                                            bullet.hitEnemies
-                                        );
+                                        if (bullet.secondchanceSP) {
+                                            const spreadAngles = [0, -0.52, 0.52];
+                                            spreadAngles.forEach(spreadAngle => {
+                                                const laserAngle = Math.atan2(bullet.dy, bullet.dx) + spreadAngle;
+                                                game.handleLaser(
+                                                    bullet.x,
+                                                    bullet.y,
+                                                    Math.cos(laserAngle),
+                                                    Math.sin(laserAngle),
+                                                    game.weapons.secondchance.laserdamage,
+                                                    []
+                                                );
+                                            });
+                                        } else {
+                                            game.handleLaser(
+                                                bullet.x,
+                                                bullet.y,
+                                                bullet.dx,
+                                                bullet.dy,
+                                                game.weapons.secondchance.laserdamage,
+                                                bullet.hitEnemies
+                                            );
+                                        }
                                     }
 
                                     if (bullet.x - bullet.radius <= 0 || bullet.x + bullet.radius >= canvas.width) {
@@ -3274,8 +3364,8 @@
                                     if (bullet.effect === 'slow') {
                                         game.player.isDebuffed = true;
                                         game.player.debuffColor = bullet.debuffColor;
-                                        game.player.speed *= 0.5;
-                                        game.player.debuffDuration = 120;
+                                        game.player.speed *= 0.4;
+                                        game.player.debuffDuration = 60;
                                     }
                                     if (bullet.explosive) {
                                         game.handleExplosion(bullet.x, bullet.y, bullet.damage, 30, 'enemy');
@@ -3557,16 +3647,16 @@
                 multishot: `다중 발사 / MultiShot\n여러 발의 탄환을 동시에 발사합니다.\nDamage ${game.weapons.multishot.damage} × ${game.weapons.multishot.spread}\n\n[ 비범하다! ]\n\n다다중 발사 / SuperMultiShot\n두명의 적을 관통하는 더 강력한 탄환을 3배 더 많이 발사합니다!`,
                 automatic: `자동의 / Automatic\n날아갈수록 점점 약해지는 탄환을 연사합니다.\nDamage ${game.weapons.automatic.damage}\n\n[ 비범하다! ]\n\n위대한토마틱 / Greatomatic\n몇발의 더 세고 위대한 총알이 세명의 적을 꿰뚫습니다!`,
                 strike: `내려치기 / Strike\n원하는 지점에 강력한 공격을 가합니다.\nDamage ${game.weapons.strike.damage}`,
-                dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 100% × 2`,
-                swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}\n\n[ 비범하다! ]\n\n공포의 휘두르다 / FearSwing\n더 거대한 범위는 총알들이 겁에 질려 도망치게 만들었습니다.`,
+                dual: `두개 / Dual\n두 개의 탄환을 동시에 발사하며, 적중 시 폭발합니다.\nDamage ${game.weapons.dual.damage} × 2 / Explode Damage 100% × 2\n\n[ 비범하다! ]\n\n초과함! / Overload\n일정시간동안 총알을 더 많이 발사합니다!`,
+                swing: `휘두르다 / Swing\n근접 범위 내의 모든 적을 공격하며, 탄환을 제거합니다.\nDamage ${game.weapons.swing.damage}\n\n[ 비범하다! ]\n\n공포의 휘두르다 / FearSwing\n더 거대한 범위는 총알들이 겁에 질려 도망치게 만들었습니다!`,
                 chain: `연쇄 / Chain\n적을 공격하면 주변의 다른 적들에게도 25% 강해진 공격이 최대 4번 연쇄적으로 가해집니다.\nDamage ${game.weapons.chain.damage}\n\n[ 비범하다! ]\n\n충격파 연쇄 / ChainOfShockwave\n더 빠르고 커다란 탄환이 2배 더 많은 적에게 연쇄폭발하며, 벽 따위에게 패배하지 않습니다!`,
                 absorb: `흡수 / Absorb\n적중 시 체력 및 최대체력이 소량 증가하며, 적 처치 시 최대체력의 0.4%를 회복합니다.\nDamage ${game.weapons.absorb.damage}\n\n[ 비범하다! ]\n\n최고의 흡수! / GreatOfAbsorb\n적을 완벽하게 관통하는 더 크고, 강하고, 빠른 탄환을 발사합니다!`,
-                burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}`,
-                secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}`,
+                burst: `터지는 공격 / Burst\n가까울수록 치명적인 거대 폭발을 일으킵니다.\nDamage ${game.weapons.burst.damage}\n\n[ 비범하다! ]\n\n크게 터지는 공격 / SuperBurst\n아주 크게 터진!`,
+                secondchance: `두번째 기회 / SecondChance\n적중 시 탄환이 거대한 레이저를 발사합니다.\nDamage ${game.weapons.secondchance.damage} / Laser Damage ${game.weapons.secondchance.laserdamage}\n\n[ 비범하다! ]\n\n세번째 기회 / ThirdChance\n더 강하고 빠른 탄환이 레이저를 산탄합니다!`,
                 cycle: `주기 / Cycle\n주기구체가 빠르게 넓은 범위를 3초간 회전합니다.\nDamage ${game.weapons.cycle.damage}\n\n[ 비범하다! ]\n\n주기 흡수 / AbsorbCycle\n더 크고 강력한 주기구체가 맹렬히 회전하며 타격 시 체력을 회복합니다!\n\n압도적 감사. 누리`,
                 strongshot: `강한 샷 / StrongShot\n적을 관통하는 강력한 탄환을 발사하며, 적중 시 작게 폭발합니다.\nDamage ${game.weapons.strongshot.damage} / Explode Damage 50%\n\n[ 비범하다! ]\n\n빠른 강한 샷 / FastStrongShot\n아주 빠르고 크게 터지다!`,
 		        tripleimpact: `세번 충격 / TripleImpact\n발사된 탄환이 점점 크게 폭발을 일으킵니다.\nDamage ${game.weapons.tripleimpact.damage} / Explode Damage 100%/150%/200%`,
-                grinder: `가정 교사 / Grinder\n나약한 자의 말은 듣지 않습니다.\nDamage ${game.weapons.grinder.damage}`,
+                grinder: `가정 교사 / Grinder\n나약한 자의 말은 듣지 않습니다.\nDamage ${game.weapons.grinder.damage}\n\n[ 비범하다! ]\n\n가정교사 셋 / TripleGrinder\n나약한 녀석!`,
                 slashandblow: `베고 일격 / SlashNBlow\n돌진하며 경로에 강력한 공격을 가하고, 이후엔 주변을 공격합니다.\nSlash Damage ${game.weapons.slashandblow.damage} / Blow Damage ${(game.weapons.slashandblow.damage * game.weapons.slashandblow.blowdamagemultifly)}\n\n압도적 감사. 누리`,
                 
                 shield: `방어 / Shield\n잠시 무적이 되며, 도중에 타격 받을 시 지속시간이 초기화됩니다. 최대 5회 방어 가능합니다.\nCool Time ${(game.defense.shield.cooldown / 1000).toFixed(1)}s × 방어 횟수`,
