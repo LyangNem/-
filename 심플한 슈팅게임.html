@@ -200,7 +200,7 @@
             <p>WASD : 이동 / 좌클릭 : 공격 / 우클릭 : 비범하게! / Space : 방어</p>
         </div>
 
-        <div id="gameVersion">v 2.9.2</div>
+        <div id="gameVersion">v 2.9.3</div>
 
         <div id="selectionModal">
             <div id="itemSelection">
@@ -912,7 +912,9 @@
                             }
                         }
                     } else if (source === 'weapon') {
-                        game.enemies.forEach((enemy, index) => {
+                        // forEach 대신 역순 for 루프 사용
+                        for (let index = game.enemies.length - 1; index >= 0; index--) {
+                            const enemy = game.enemies[index];
                             let dist = Math.sqrt((enemy.x - x) ** 2 + (enemy.y - y) ** 2);
                             if (dist < explosionRadius) {
                                 let dmg = damage;
@@ -934,7 +936,7 @@
                                     enemy.healthBarVisible = true;
                                 }
                             }
-                        });
+                        }
                     }
                 },
 
@@ -1042,7 +1044,9 @@
                             return true;
                         });
                     }
-                    game.enemies.forEach((enemy, index) => {
+                    // forEach 대신 역순 for 루프 사용
+                    for (let index = game.enemies.length - 1; index >= 0; index--) {
+                        const enemy = game.enemies[index];
                         if (game.utils.circleCollision(effect, enemy)) {
                             if (game.player.weapon.name === '베고 일격') {
                                 enemy.health -= game.player.weapon.damage * game.player.weapon.blowdamagemultifly;
@@ -1055,7 +1059,7 @@
                                 enemy.healthBarVisible = true;
                             }
                         }
-                    });
+                    }
                 },
                 handleSwordEffectDamageOfMonstrance: function (x, y, radius) {
                     const effect = {
@@ -1063,7 +1067,8 @@
                         y: y,
                         radius: radius,
                     };
-                    game.enemies.forEach((enemy, index) => {
+                    for (let index = game.enemies.length - 1; index >= 0; index--) {
+                        const enemy = game.enemies[index];
                         if (game.utils.circleCollisionOfMonstrance(effect, enemy)) {
                             enemy.health -= game.player.weapon.damage * 0.15 * game.player.has_monstrance;
                             if (enemy.health <= 0) {
@@ -1072,7 +1077,7 @@
                                 enemy.healthBarVisible = true;
                             }
                         }
-                    });
+                    }
                 },
                 player: {
                     x: canvas.width / 2,
